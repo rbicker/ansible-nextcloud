@@ -1,0 +1,56 @@
+---
+# installation.yml
+
+- name: installation - ensure nextcloud is unarchived in {{ nextcloud_web_root }}
+  unarchive:
+    src: '{{ nextcloud_repo_url  }}/nextcloud-{{ nextcloud_version }}.tar.bz2'
+    remote_src: true
+    dest: '{{ nextcloud_web_root }}/..'
+
+- name: installation - ensure nextcloud directory permissions are set
+  command: '{{ nextcloud_working_dir }}/nextcloud_permissions.sh'
+
+- name: installation - ensure nextcloud installation is finished
+  command: 'php {{ nextcloud_web_root }}/occ maintenance:install --database "mysql" --database-name "{{ nextcloud_mysql_db }}"  --database-user "{{ nextcloud_mysql_user }}" --database-pass "{{ nextcloud_mysql_pw }}" --admin-user "{{ nextcloud_admin_user }}" --admin-pass "{{ nextcloud_admin_pw }}" --data-dir "{{ nextcloud_data_root }}"'
+  become: true
+  become_user: nginx
+
+- name: installation - ensure trusted domain is set
+  command: 'php {{ nextcloud_web_root }}/occ config:system:set trusted_domains 1 --value "{{ nextcloud_domain  }}"'
+  become: true
+  become_user: nginx
+
+- name: performance tuning - ensure the nextcloud cronjob exists and runs every 15 min
+  cron:
+    name: nextcloud
+    minute: 15
+    user: nginx
+    job: 'php -f /var/www/nextcloud/cron.php'
+
+# performance tuning
+# https://docs.nextcloud.com/server/9/admin_manual/configuration_server/oc_server_tuning.html
+
+- name: performance tuning - configure APCu for local caching
+  command: 'php {{ nextcloud_web_root }}/occ config:system:set memcache.local --value "\OC\Memcache\APCu"'
+  become: true
+  become_user: nginx
+
+- name: performance tuning - use redis for file locking
+  command: 'php {{ nextcloud_web_root }}/occ config:system:set memcache.locking --value "\OC\Memcache\Redis"'
+  become: true
+  become_user: nginx
+
+- name: performance tuning - connect to redis on localhost
+  command: 'php {{ nextcloud_web_root }}/occ config:system:set redis "host" --value "localhost"'
+  become: true
+  become_user: nginx
+
+- name: performance tuning - connect to redis on port 6379
+  command: 'php {{ nextcloud_web_root }}/occ config:system:set redis "port" --value 6379'
+  become: true
+  become_user: nginx
+
+- name: performance tuning - js and css asset management
+  command: 'php {{ nextcloud_web_root }}/occ config:system:set asset-pipeline.enabled --value true'
+  become: true
+  become_user: nginx

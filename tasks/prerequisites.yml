@@ -1,0 +1,158 @@
+---
+# prerequisites.yml
+
+- name: ensure epel-relase and webtatic yum repos are installed
+  yum:
+    name: '{{ item }}'
+    state: present
+  with_items:
+    - epel-release
+    - https://mirror.webtatic.com/yum/el7/webtatic-release.rpm
+
+- name: ensure required packages are installed
+  yum:
+    name: '{{ item }}'
+  with_items:
+    - lbzip2-utils
+    - nginx
+    - openssl
+    - mariadb-server
+    - MySQL-python
+    - redis
+    - php70w-fpm
+    - php70w-opcache
+    - php70w-common
+    - php70w-xml
+    - php70w-gd
+    - php70w-xml
+    - php70w-mbstring
+    - php70w-intl
+    - php70w-mcrypt
+    - php70w-mysql
+    - php70w-ldap
+    - php70w-imap
+    - php70w-pecl-apcu
+    - php70w-pecl-redis
+    - php70w-pecl-imagick
+    - libreoffice
+
+- name: ensure mysql server.cnf is present
+  copy:
+    src: server.cnf
+    dest: /etc/my.cnf.d/server.cnf
+  notify: 
+    - reload mariadb
+
+- name: ensure mariadb-server is enabled and started
+  service:
+    name: mariadb
+    state: started
+    enabled: yes
+
+- name: ensure the mariadb root password is set
+  mysql_user:
+    login_user: root
+    name: root
+    password: '{{ mysql_root_pw }}'
+- name: ensure /root/.my.cnf is present
+  template:
+    src: my.cnf.j2
+    dest: /root/.my.cnf
+    owner: root
+    group: root
+    mode: '0600'
+
+- name: ensure anonymous mysql user is absent
+  mysql_user:
+    name: ''
+    login_user: root
+    host_all: yes
+    state: absent
+
+- name: ensure mysql test database is absent
+  mysql_db:
+    name: test
+    login_user: root
+    state: absent
+
+- name: ensure nextcloud database {{ nextcloud_mysql_db }} exists
+  mysql_db:
+    name: '{{ nextcloud_mysql_db }}'
+    login_user: root
+    state: present
+
+- name: ensure database user {{ nextcloud_mysql_user }} exists and has all privileges  on {{ nextcloud_mysql_db }}
+  mysql_user:
+    name: '{{ nextcloud_mysql_user }}'
+    password: '{{ nextcloud_mysql_pw }}'
+    login_user: root
+    priv: '{{ nextcloud_mysql_db }}.*:ALL,GRANT'
+    state: present
+
+- name: ensure pdo_mysql.ini config is present
+  copy:
+    src: pdo_mysql.ini
+    dest: /etc/php.d/pdo_mysql.ini
+
+- name: ensure redis.conf is present
+  copy:
+    src: redis.conf
+    dest: /etc/redis.conf
+  notify:
+    - restart redis
+
+- name: ensure directory for php sessions exists and has nginx as owner
+  file:
+    path: /var/lib/php/session
+    owner: nginx
+    group: nginx
+    state: directory
+
+- name: ensure default site nginx config is absent
+  file:
+    path: /etc/nginx/conf.d/default.conf
+    state: absent
+
+- name: ensure nextcloud.conf nginx config is present
+  template:
+    src: nginx.conf.j2
+    dest: /etc/nginx/conf.d/nextcloud.conf
+  notify: 
+    - reload nginx
+
+- name: ensure ssl key and cert are present
+  command: 'openssl req -new -nodes -x509 -subj {{ nextcloud_ssl_subject }} -days 3650 -keyout {{ nextcloud_ssl_key }} -out {{nextcloud_ssl_cert }} -extensions v3_ca creates={{ nextcloud_ssl_cert }}'
+  notify: 
+    - reload nginx
+
+- name: ensure php-fpm www.conf is present
+  copy:
+    src: www.conf
+    dest: /etc/php-fpm.d/www.conf
+  notify: reload php-fpm
+
+- name: ensure nginx, php-fpm and redis are enabled and running
+  service:
+    name: '{{ item }}'
+    state: running
+    enabled: yes
+  with_items:
+    - php-fpm
+    - nginx
+    - redis
+
+- name: ensure working dir is present
+  file:
+    path: '{{ nextcloud_working_dir }}'
+    state: directory
+
+- name: ensure nextcloud_permissions.sh is present
+  template:
+    src: nextcloud_permissions.sh.j2
+    dest: '{{ nextcloud_working_dir }}/nextcloud_permissions.sh'
+    mode: 0755
+
+- name: ensure alias for the occ command exists in /root/.bashrc
+  lineinfile:
+    name: /root/.bashrc
+    line: "alias occ='sudo -u nginx /var/www/nextcloud/occ'"

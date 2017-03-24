@@ -1,0 +1,20 @@
+---
+# defaults file for rbicker.nextcloud
+
+mysql_root_pw: secret
+nextcloud_repo_url: https://download.nextcloud.com/server/releases
+nextcloud_version: 11.0.2
+#nextcloud_domain: nextcloud.mydomain.com
+nextcloud_ssl_cert: /etc/nginx/nextcloud.crt
+nextcloud_ssl_key: /etc/nginx/nextcloud.key
+nextcloud_ssl_subject: '/C=CH/ST=Lucerne/L=Lucerne/O=/CN={{ nextcloud_domain }}'
+nextcloud_working_dir: /nextcloud
+nextcloud_web_root: /var/www/nextcloud
+nextcloud_data_root: '{{ nextcloud_working_dir }}/data'
+nextcloud_backup_dir: '{{ nextcloud_working_dir }}/backup'
+nextcloud_admin_user: admin
+nextcloud_admin_pw: admin
+nextcloud_mysql_db: nextcloud
+nextcloud_mysql_user: nextcloud
+nextcloud_mysql_pw: nextcloud
+nextcloud_upgrade: false

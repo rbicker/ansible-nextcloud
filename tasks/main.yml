@@ -1,0 +1,29 @@
+---
+# task file for rbicker.nextcloud
+
+- include: 'prerequisites.yml'
+
+- name: ensure {{ nextcloud_web_root }} is present
+  file:
+    name: '{{ nextcloud_web_root }}'
+    state: directory
+  register: new_installation
+
+- include: 'installation.yml'
+  when: new_installation.changed
+
+- name: check version string for upgrade
+  shell: "/var/www/nextcloud/occ -V | grep 'Nextcloud version' | awk -F ' ' '{ print $3}'"
+  become: true
+  become_user: nginx
+  register: current_version
+  when: nextcloud_upgrade and not new_installation.changed
+  changed_when: False
+
+- name: fail the play when current version cannot be determined
+  fail:
+    msg: current nextcloud version cannot be determined
+  when: nextcloud_upgrade and current_version.stdout == ''
+
+- include: 'upgrade.yml'
+  when: nextcloud_upgrade and not new_installation.changed and current_version.stdout != nextcloud_version

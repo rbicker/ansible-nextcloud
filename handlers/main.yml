@@ -1,0 +1,22 @@
+---
+# handlers file for rbicker.nextcloud
+
+- name: reload nginx
+  service:
+    name: nginx
+    state: reloaded
+
+- name: reload php-fpm
+  service:
+    name: php-fpm
+    state: reloaded
+
+- name: reload mariadb
+  service:
+    name: mariadb
+    state: reloaded
+
+- name: restart redis
+  service:
+    name: redis
+    state: restarted 
