@@ -19,8 +19,9 @@ Role Variables
 nextcloud_domain: nextcloud.mydomain.com # domain used in nginx and nextcloud version (REQUIRED)
 mysql_root_pw: secret # root password for 
 nextcloud_repo_url: https://download.nextcloud.com/server/releases # where to get the nextcloud archive
-nextcloud_version: 11.0.2 # version to install (or upgrade to)
-nextcloud_ssl_cert: /etc/nginx/nextcloud.crt # ssl cert path
+nextcloud_version: 12.0.0 # version to install (or upgrade to)
+nextcloud_use_https: true # set to false if you want to run your instance behind a loadbalancer with ssl-termination
+nextcloud_ssl_cert: /etc/nginx/nextcloud.crt # self-signed ssl cert path
 nextcloud_ssl_key: /etc/nginx/nextcloud.key # ssl key path
 nextcloud_ssl_subject: '/C=CH/ST=Lucerne/L=Lucerne/O=/CN={{ nextcloud_domain }}' # subject for ssl cert
 nextcloud_working_dir: /nextcloud # directory for storing scripts
