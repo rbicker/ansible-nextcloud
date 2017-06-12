@@ -179,4 +179,4 @@
 - name: ensure alias for the occ command exists in /root/.bashrc
   lineinfile:
     name: /root/.bashrc
-    line: "alias occ='sudo -u nginx /var/www/nextcloud/occ'"
+    line: "alias occ='sudo -u nginx {{ nextcloud_web_root }}/occ'"

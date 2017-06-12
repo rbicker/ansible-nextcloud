@@ -7,6 +7,10 @@
     remote_src: true
     dest: '{{ nextcloud_web_root }}/..'
 
+- name: installation - ensure .users.ini settings are adjusted for large files
+  copy: user.ini
+  dest: '{{ nextcloud_web_root }}/.user.ini'
+
 - name: installation - ensure nextcloud directory permissions are set
   command: '{{ nextcloud_working_dir }}/nextcloud_permissions.sh'
 
