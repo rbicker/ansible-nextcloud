@@ -20,21 +20,22 @@
     - mariadb-server
     - MySQL-python
     - redis
-    - php70w-fpm
-    - php70w-opcache
-    - php70w-common
-    - php70w-xml
-    - php70w-gd
-    - php70w-xml
-    - php70w-mbstring
-    - php70w-intl
-    - php70w-mcrypt
-    - php70w-mysql
-    - php70w-ldap
-    - php70w-imap
-    - php70w-pecl-apcu
-    - php70w-pecl-redis
-    - php70w-pecl-imagick
+    - php71w-fpm
+    - php71w-opcache
+    - php71w-common # ctype, iconv, json, libxml, simplexml, zip, zlib, curl, fileinfo, bz2, openssl, ftp, exif, gmp
+    - php71w-xml
+    - php71w-gd 
+    - php71w-xml # dom, xmlreader, xmlwriter
+    - php71w-mbstring 
+    - php71w-intl # intl
+    - php71w-mcrypt
+    - php71w-mysql
+    - php71w-ldap
+    - php71w-imap
+    - php71w-pecl-apcu 
+    - php71w-pecl-redis
+    - php71w-pecl-imagick
+    - php71w-process # posix
     - libreoffice
 
 - name: ensure mysql server.cnf is present
@@ -42,7 +43,7 @@
     src: server.cnf
     dest: /etc/my.cnf.d/server.cnf
   notify: 
-    - reload mariadb
+    - restart mariadb
 
 - name: ensure mariadb-server is enabled and started
   service:
@@ -169,12 +170,6 @@
   file:
     path: '{{ nextcloud_working_dir }}'
     state: directory
-
-- name: ensure nextcloud_permissions.sh is present
-  template:
-    src: nextcloud_permissions.sh.j2
-    dest: '{{ nextcloud_working_dir }}/nextcloud_permissions.sh'
-    mode: 0755
 
 - name: ensure alias for the occ command exists in /root/.bashrc
   lineinfile:

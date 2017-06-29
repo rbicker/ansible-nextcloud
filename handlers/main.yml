@@ -16,10 +16,10 @@
     name: php-fpm
     state: restarted
 
-- name: reload mariadb
+- name: restart mariadb
   service:
     name: mariadb
-    state: reloaded
+    state: restarted
 
 - name: restart redis
   service:

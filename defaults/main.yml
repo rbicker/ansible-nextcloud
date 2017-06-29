@@ -5,7 +5,8 @@ mysql_root_pw: secret
 nextcloud_repo_url: https://download.nextcloud.com/server/releases
 nextcloud_version: 12.0.0
 nextcloud_use_https: true
-#nextcloud_domain: nextcloud.mydomain.com
+nextcloud_domain: nextcloud.mydomain.com
+nextcloud_trusted_domains: ['localhost', '{{ nextcloud_domain }}']
 nextcloud_ssl_cert: /etc/nginx/nextcloud.crt
 nextcloud_ssl_key: /etc/nginx/nextcloud.key
 nextcloud_ssl_subject: '/C=CH/ST=Lucerne/L=Lucerne/O=/CN={{ nextcloud_domain }}'
