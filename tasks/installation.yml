@@ -23,7 +23,6 @@
 - name: installation - ensure directories exist with correct permissions
   file:
     path: '{{ item  }}'
-    state: directory
     owner: nginx
     group: nginx
     recurse: yes
