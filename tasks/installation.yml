@@ -28,11 +28,12 @@
     recurse: yes
     state: directory
   with_items:
-    - '{{ nextcloud_web_root }}/apps/'
-    - '{{ nextcloud_web_root }}/config/'
+    - '{{ nextcloud_web_root }}'
+    #- '{{ nextcloud_web_root }}/apps/'
+    #- '{{ nextcloud_web_root }}/config/'
     - '{{ nextcloud_data_root }}'
-    - '{{ nextcloud_web_root }}/themes/'
-    - '{{ nextcloud_web_root }}/updater/'
+    #- '{{ nextcloud_web_root }}/themes/'
+    #- '{{ nextcloud_web_root }}/updater/'
 
 - name: installation - ensure SELinux file context mapping definitions are correct
   sefcontext:
