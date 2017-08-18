@@ -96,6 +96,10 @@
     path: /etc/php.ini
     regexp: '^expose_php'
     line: 'expose_php = Off'    
+  notify:
+    - reload php-fpm
+    - reload nginx
+    
 
 - name: ensure pdo_mysql.ini config is present
   copy:
