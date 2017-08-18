@@ -91,6 +91,12 @@
     priv: '{{ nextcloud_mysql_db }}.*:ALL,GRANT'
     state: present
 
+- name: ensure php version is hidden
+  lineinfile:
+    path: /etc/php.ini
+    regexp: '^expose_php'
+    line: 'expose_php = Off'    
+
 - name: ensure pdo_mysql.ini config is present
   copy:
     src: pdo_mysql.ini
