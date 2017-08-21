@@ -1,14 +1,14 @@
 rbicker.nextcloud
 =================
 
-* install or upgrade nextcloud (12) on centos 7
+* install nextcloud (12) on centos 7
 * install dependencies: nginx, php7.1, redis, mariadb
 * generate ssl cert (self signed) if nextcloud_use_https is true
 * follow best practises, performance tuning 
 
 Important:
 * php version has been upgraded from 7.0 to 7.1, if you would like to update a server which has been installed by an older version of this role, run "yum remove -y php70w\*"
-* upgrading is currently done by manual steps, maybe the updater.phar will be used in the future
+* upgrading nextcloud was removed from this role
 
 Requirements
 ------------

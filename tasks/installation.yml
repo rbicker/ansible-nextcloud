@@ -7,64 +7,7 @@
     remote_src: true
     dest: '{{ nextcloud_web_root }}/..'
 
-- name: installation - ensure webroot directory has correct permissions
-  file:
-    path: '{{ nextcloud_web_root }}'
-    owner: root
-    group: nginx
-    recurse: yes
-    state: directory
-
-- name: installation - ensure occ is executable
-  file:
-    path: '{{ nextcloud_web_root }}/occ'
-    mode: a+x
-
-- name: installation - ensure directories exist with correct permissions
-  file:
-    path: '{{ item  }}'
-    owner: nginx
-    group: nginx
-    recurse: yes
-    state: directory
-  with_items:
-    - '{{ nextcloud_web_root }}'
-    #- '{{ nextcloud_web_root }}/apps/'
-    #- '{{ nextcloud_web_root }}/config/'
-    - '{{ nextcloud_data_root }}'
-    #- '{{ nextcloud_web_root }}/themes/'
-    #- '{{ nextcloud_web_root }}/updater/'
-
-#- name: installation - ensure SELinux file context mapping definitions are correct
-#  sefcontext:
-#    target: '{{ item  }}'
-#    setype: httpd_sys_rw_content_t
-#  with_items:
-#    - '{{ nextcloud_data_root }}(/.*)?'
-#    - '{{ nextcloud_web_root }}/config(/.*)?'
-#    - '{{ nextcloud_web_root }}/apps(/.*)?'
-#    - '{{ nextcloud_web_root }}/.htaccess'
-#    - '{{ nextcloud_web_root }}/.user.ini'
-#  register:
-#    sefcontext
-
-- name: installation - restorecon if SELinux file context was changed
-  command: '{{ item  }}'
-#  when: sefcontext.changed
-  with_items:
-    - 'restorecon -Rv {{ nextcloud_data_root }}'
-    - 'restorecon -Rv {{ nextcloud_web_root }}'
-
-- name: installation - set SELinux boolean for redis
-  seboolean:
-    name: httpd_can_network_connect
-    state: yes
-    persistent: yes
-
-#- name: installation - ensure .users.ini settings are adjusted for large files
-#  copy: 
-#    src: user.ini
-#    dest: '{{ nextcloud_web_root }}/.user.ini'
+- include: 'permissions.yml'
 
 - name: installation - ensure nextcloud installation is finished
   command: 'php {{ nextcloud_web_root }}/occ maintenance:install --database "mysql" --database-name "{{ nextcloud_mysql_db }}"  --database-user "{{ nextcloud_mysql_user }}" --database-pass "{{ nextcloud_mysql_pw }}" --admin-user "{{ nextcloud_admin_user }}" --admin-pass "{{ nextcloud_admin_pw }}" --data-dir "{{ nextcloud_data_root }}"'
@@ -77,13 +20,6 @@
   become_user: nginx
   with_indexed_items:
     - '{{ nextcloud_trusted_domains  }}'
-
-- name: performance tuning - ensure the nextcloud cronjob exists and runs every 15 min
-  cron:
-    name: nextcloud
-    minute: 15
-    user: nginx
-    job: 'php -f /var/www/nextcloud/cron.php'
 
 # performance tuning
 # https://docs.nextcloud.com/server/12/admin_manual/configuration_server/server_tuning.html

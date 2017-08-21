@@ -1,7 +1,191 @@
 ---
 # task file for rbicker.nextcloud
 
-- include: 'prerequisites.yml'
+- name: ensure epel-relase and webtatic yum repos are installed
+  yum:
+    name: '{{ item }}'
+    state: present
+  with_items:
+    - epel-release
+    - https://mirror.webtatic.com/yum/el7/webtatic-release.rpm
+
+- name: ensure required packages are installed
+  yum:
+    name: '{{ item }}'
+  with_items:
+    - policycoreutils-python
+    - lbzip2-utils
+    - nginx
+    - openssl
+    - mariadb-server
+    - MySQL-python
+    - redis
+    - php71w-fpm
+    - php71w-opcache
+    - php71w-common # ctype, iconv, json, libxml, simplexml, zip, zlib, curl, fileinfo, bz2, openssl, ftp, exif, gmp
+    - php71w-xml
+    - php71w-gd 
+    - php71w-xml # dom, xmlreader, xmlwriter
+    - php71w-mbstring 
+    - php71w-intl # intl
+    - php71w-mcrypt
+    - php71w-mysql
+    - php71w-ldap
+    - php71w-imap
+    - php71w-pecl-apcu 
+    - php71w-pecl-redis
+    - php71w-pecl-imagick
+    - php71w-process # posix
+    - libreoffice
+
+- name: ensure mysql binary logging is disabled
+  lineinfile:
+    path: /etc/my.cnf.d/server.cnf
+    state: absent
+    regexp: '^log_bin$' 
+  notify:
+    - restart mariadb
+
+- name: ensure mariadb-server is enabled and started
+  service:
+    name: mariadb
+    state: started
+    enabled: yes
+
+- name: ensure the mariadb root password is set
+  mysql_user:
+    login_user: root
+    name: root
+    password: '{{ mysql_root_pw }}'
+
+- name: ensure /root/.my.cnf is present
+  template:
+    src: my.cnf.j2
+    dest: /root/.my.cnf
+    owner: root
+    group: root
+    mode: '0600'
+
+- name: ensure anonymous mysql user is absent
+  mysql_user:
+    name: ''
+    login_user: root
+    host_all: yes
+    state: absent
+
+- name: ensure mysql test database is absent
+  mysql_db:
+    name: test
+    login_user: root
+    state: absent
+
+- name: ensure nextcloud database {{ nextcloud_mysql_db }} exists
+  mysql_db:
+    name: '{{ nextcloud_mysql_db }}'
+    login_user: root
+    state: present
+
+- name: ensure database user {{ nextcloud_mysql_user }} exists and has all privileges  on {{ nextcloud_mysql_db }}
+  mysql_user:
+    name: '{{ nextcloud_mysql_user }}'
+    password: '{{ nextcloud_mysql_pw }}'
+    login_user: root
+    priv: '{{ nextcloud_mysql_db }}.*:ALL,GRANT'
+    state: present
+
+- name: ensure php version is hidden
+  lineinfile:
+    path: /etc/php.ini
+    regexp: '^expose_php'
+    line: 'expose_php = Off'    
+  notify:
+    - reload php-fpm
+    - reload nginx
+    
+- name: ensure pdo_mysql.ini config is present
+  copy:
+    src: pdo_mysql.ini
+    dest: /etc/php.d/pdo_mysql.ini
+
+#- name: ensure redis.conf is present
+#  copy:
+#    src: redis.conf
+#    dest: /etc/redis.conf
+#  notify:
+#    - restart redis
+
+- name: ensure directory for php sessions exists and has nginx as owner
+  file:
+    path: /var/lib/php/session
+    owner: nginx
+    group: nginx
+    state: directory
+
+- name: enusre /etc/nginx/nginx.conf is present
+  copy:
+    src: nginx.conf
+    dest: /etc/nginx/nginx.conf
+  notify:
+    - reload nginx
+
+- name: ensure default site nginx config is absent
+  file:
+    path: /etc/nginx/conf.d/default.conf
+    state: absent
+
+- name: ensure nextcloud.conf nginx config is present
+  template:
+    src: nginx.conf.j2
+    dest: /etc/nginx/conf.d/nextcloud.conf
+  notify: 
+    - reload nginx
+
+- name: ensure ssl key and cert are present
+  command: 'openssl req -new -nodes -x509 -subj {{ nextcloud_ssl_subject }} -days 3650 -keyout {{ nextcloud_ssl_key }} -out {{nextcloud_ssl_cert }} -extensions v3_ca creates={{ nextcloud_ssl_cert }}'
+  notify: 
+    - reload nginx
+  when: nextcloud_use_https
+
+- name: ensure php-fpm www.conf is present
+  copy:
+    src: www.conf
+    dest: /etc/php-fpm.d/www.conf
+  notify: reload php-fpm
+
+- name: ensure opcache settings are correct
+  lineinfile:
+    path: /etc/php.d/opcache.ini
+    regexp: '^{{ item.name }}='
+    line: '{{ item.name }}={{ item.value }}'
+  with_items:
+    - { name: opcache.enable, value: 1 }
+    - { name: opcache.enable_cli, value: 1 }
+    - { name: opcache.interned_strings_buffer, value: 8 }
+    - { name: opcache.max_accelerated_files, value: 10000 }
+    - { name: opcache.memory_consumption, value: 128 }
+    - { name: opcache.save_comments, value: 1 }
+    - { name: opcache.revalidate_freq, value: 1 }
+  notify: restart php-fpm
+
+- name: ensure nginx, php-fpm and redis are enabled and running
+  service:
+    name: '{{ item }}'
+    state: started
+    enabled: yes
+  with_items:
+    - php-fpm
+    - nginx
+    - redis
+
+#- name: ensure working dir is present
+#  file:
+#    path: '{{ nextcloud_working_dir }}'
+#    state: directory
+
+- name: ensure alias for the occ command exists in /root/.bashrc
+  lineinfile:
+    name: /root/.bashrc
+    line: "alias occ='sudo -u nginx {{ nextcloud_web_root }}/occ'"
 
 - name: ensure {{ nextcloud_web_root }} is present
   file:
@@ -12,18 +196,4 @@
 - include: 'installation.yml'
   when: new_installation.changed
 
-- name: check version string for upgrade
-  shell: "/var/www/nextcloud/occ -V | grep 'Nextcloud version' | awk -F ' ' '{ print $3}'"
-  become: true
-  become_user: nginx
-  register: current_version
-  when: nextcloud_upgrade and not new_installation.changed
-  changed_when: False
-
-- name: fail the play when current version cannot be determined
-  fail:
-    msg: current nextcloud version cannot be determined
-  when: nextcloud_upgrade and current_version.stdout == ''
-
-- include: 'upgrade.yml'
-  when: nextcloud_upgrade and not new_installation.changed and current_version.stdout != nextcloud_version
+- include: 'permissions.yml'

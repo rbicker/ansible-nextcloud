@@ -10,10 +10,8 @@ nextcloud_trusted_domains: ['localhost', '{{ nextcloud_domain }}']
 nextcloud_ssl_cert: /etc/nginx/nextcloud.crt
 nextcloud_ssl_key: /etc/nginx/nextcloud.key
 nextcloud_ssl_subject: '/C=CH/ST=Lucerne/L=Lucerne/O=/CN={{ nextcloud_domain }}'
-nextcloud_working_dir: /nextcloud
 nextcloud_web_root: /var/www/nextcloud
-nextcloud_data_root: '{{ nextcloud_working_dir }}/data'
-nextcloud_backup_dir: '{{ nextcloud_working_dir }}/backup'
+nextcloud_data_root: /nextcloud/data
 nextcloud_admin_user: admin
 nextcloud_admin_pw: admin
 nextcloud_mysql_db: nextcloud

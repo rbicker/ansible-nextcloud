@@ -1,0 +1,43 @@
+---
+# permissions.yml
+
+- name: ensure occ is executable
+  file:
+    path: '{{ nextcloud_web_root }}/occ'
+    mode: a+x
+
+- name: ensure directories exist with correct permissions
+  file:
+    path: '{{ item  }}'
+    owner: nginx
+    group: nginx
+    recurse: yes
+    state: directory
+  with_items:
+    - '{{ nextcloud_web_root }}'
+    - '{{ nextcloud_data_root }}'
+
+- name: ensure SELinux file context mapping definitions are correct
+  sefcontext:
+    target: '{{ item  }}'
+    setype: httpd_sys_rw_content_t
+  with_items:
+    - '{{ nextcloud_data_root }}(/.*)?'
+    - '{{ nextcloud_web_root }}/config(/.*)?'
+    - '{{ nextcloud_web_root }}/apps(/.*)?'
+    - '{{ nextcloud_web_root }}/.htaccess'
+    - '{{ nextcloud_web_root }}/.user.ini'
+  register: sefcontext
+
+- name: run restorecon if SELinux file context was changed
+  command: '{{ item  }}'
+  when: sefcontext.changed
+  with_items:
+    - 'restorecon -Rv {{ nextcloud_data_root }}'
+    - 'restorecon -Rv {{ nextcloud_web_root }}'
+
+- name: ensure SELinux boolean is set for redis
+  seboolean:
+    name: httpd_can_network_connect
+    state: yes
+    persistent: yes

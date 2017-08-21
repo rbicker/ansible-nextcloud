@@ -38,11 +38,20 @@
     - php71w-process # posix
     - libreoffice
 
-- name: ensure mysql server.cnf is present
-  copy:
-    src: server.cnf
-    dest: /etc/my.cnf.d/server.cnf
-  notify: 
+- name: ensure /root/.my.cnf is present
+  template:
+    src: my.cnf.j2
+    dest: /root/.my.cnf
+    owner: root
+    group: root
+    mode: '0600'
+
+- name: ensure mysql binary logging is disabled
+  lineinfile:
+    path: /etc/my.cnf.d/server.cnf
+    state: absent
+    line:
+  notify:
     - restart mariadb
 
 - name: ensure mariadb-server is enabled and started
@@ -56,13 +65,6 @@
     login_user: root
     name: root
     password: '{{ mysql_root_pw }}'
-- name: ensure /root/.my.cnf is present
-  template:
-    src: my.cnf.j2
-    dest: /root/.my.cnf
-    owner: root
-    group: root
-    mode: '0600'
 
 - name: ensure anonymous mysql user is absent
   mysql_user:
@@ -100,18 +102,17 @@
     - reload php-fpm
     - reload nginx
     
-
 - name: ensure pdo_mysql.ini config is present
   copy:
     src: pdo_mysql.ini
     dest: /etc/php.d/pdo_mysql.ini
 
-- name: ensure redis.conf is present
-  copy:
-    src: redis.conf
-    dest: /etc/redis.conf
-  notify:
-    - restart redis
+#- name: ensure redis.conf is present
+#  copy:
+#    src: redis.conf
+#    dest: /etc/redis.conf
+#  notify:
+#    - restart redis
 
 - name: ensure directory for php sessions exists and has nginx as owner
   file:
@@ -151,16 +152,6 @@
     dest: /etc/php-fpm.d/www.conf
   notify: reload php-fpm
 
-- name: ensure nginx, php-fpm and redis are enabled and running
-  service:
-    name: '{{ item }}'
-    state: started
-    enabled: yes
-  with_items:
-    - php-fpm
-    - nginx
-    - redis
-
 - name: ensure opcache settings are correct
   lineinfile:
     path: /etc/php.d/opcache.ini
@@ -176,10 +167,20 @@
     - { name: opcache.revalidate_freq, value: 1 }
   notify: restart php-fpm
 
-- name: ensure working dir is present
-  file:
-    path: '{{ nextcloud_working_dir }}'
-    state: directory
+- name: ensure nginx, php-fpm and redis are enabled and running
+  service:
+    name: '{{ item }}'
+    state: started
+    enabled: yes
+  with_items:
+    - php-fpm
+    - nginx
+    - redis
+
+#- name: ensure working dir is present
+#  file:
+#    path: '{{ nextcloud_working_dir }}'
+#    state: directory
 
 - name: ensure alias for the occ command exists in /root/.bashrc
   lineinfile:
