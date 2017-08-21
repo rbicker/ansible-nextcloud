@@ -42,7 +42,7 @@
   lineinfile:
     path: /etc/my.cnf.d/server.cnf
     state: absent
-    regexp: '^log_bin$' 
+    regexp: '^log-bin$' 
   notify:
     - restart mariadb
 
