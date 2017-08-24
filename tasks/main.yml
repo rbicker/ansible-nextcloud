@@ -93,11 +93,17 @@
     priv: '{{ nextcloud_mysql_db }}.*:ALL,GRANT'
     state: present
 
-- name: ensure php version is hidden
+- name: ensure php options are set
   lineinfile:
     path: /etc/php.ini
-    regexp: '^expose_php'
-    line: 'expose_php = Off'    
+    regexp: '^{{ item.option }}'
+    line: '{{ item.option }} = {{ item.value }}'    
+  with_items:
+    - { option: 'expose_php', value: 'Off' }
+    #- { option: 'upload_max_filesize', value: '{{ nextcloud_max_upload_size }}' }
+    #- { option: 'post_max_size', value: '{{ nextcloud_max_upload_size }}' }
+    - { option: 'max_input_time', value: '{{ nextcloud_max_upload_time }}' }
+    - { option: 'max_execution_time', value: '{{ nextcloud_max_upload_time }}' }
   notify:
     - reload php-fpm
     - reload nginx
@@ -195,5 +201,13 @@
 
 - include: 'installation.yml'
   when: new_installation.changed
+
+- name: ensure .user.ini config is present
+  template:
+    src: user.ini.j2
+    dest: '{{ nextcloud_web_root }}/.user.ini'
+  notify:
+    - reload nginx
+    - reload php-fpm
 
 - include: 'permissions.yml'

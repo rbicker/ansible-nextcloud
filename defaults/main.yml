@@ -17,4 +17,5 @@ nextcloud_admin_pw: admin
 nextcloud_mysql_db: nextcloud
 nextcloud_mysql_user: nextcloud
 nextcloud_mysql_pw: nextcloud
-nextcloud_upgrade: false
+nextcloud_max_upload_size: 16G
+nextcloud_max_upload_time: 3600
