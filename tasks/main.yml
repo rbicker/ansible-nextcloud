@@ -210,4 +210,11 @@
     - reload nginx
     - reload php-fpm
 
+- name: performance tuning - ensure the nextcloud cronjob exists and runs every 15 min         
+  cron:               
+    name: nextcloud           
+    minute: 15                
+    user: nginx               
+    job: 'php -f /var/www/nextcloud/cron.php'
+
 - include: 'permissions.yml'
