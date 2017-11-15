@@ -13,6 +13,7 @@
   yum:
     name: '{{ item }}'
   with_items:
+    - crontabs
     - policycoreutils-python
     - lbzip2-utils
     - nginx
