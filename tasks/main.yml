@@ -14,6 +14,7 @@
     name: '{{ item }}'
   with_items:
     - crontabs
+    - libselinux-python
     - policycoreutils-python
     - lbzip2-utils
     - nginx
@@ -200,7 +201,7 @@
     state: directory
   register: new_installation
 
-- include: 'installation.yml'
+- import_tasks: 'installation.yml'
   when: new_installation.changed
 
 - name: ensure .user.ini config is present
@@ -218,4 +219,4 @@
     user: nginx               
     job: 'php -f /var/www/nextcloud/cron.php'
 
-- include: 'permissions.yml'
+- import_tasks: 'permissions.yml'

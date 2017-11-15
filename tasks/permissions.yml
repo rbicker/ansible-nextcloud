@@ -1,11 +1,6 @@
 ---
 # permissions.yml
 
-- name: Check if SELINUX is running
-  command: getenforce
-  register: selinux_status
-  changed_when: false
-
 - name: ensure occ is executable
   file:
     path: '{{ nextcloud_web_root }}/occ'
@@ -21,7 +16,6 @@
   with_items:
     - '{{ nextcloud_web_root }}'
     - '{{ nextcloud_data_root }}'
-  when: "'enabled' in selinux_status.stdout | lower"
 
 - name: ensure SELinux file context mapping definitions are correct
   sefcontext:
@@ -34,7 +28,7 @@
     - '{{ nextcloud_web_root }}/.htaccess'
     - '{{ nextcloud_web_root }}/.user.ini'
   register: sefcontext
-  when: "'enabled' in selinux_status.stdout | lower"
+  when: ansible_selinux.status == 'enabled'
 
 - name: run restorecon if SELinux file context was changed
   command: '{{ item  }}'
@@ -42,7 +36,7 @@
     - 'restorecon -Rv {{ nextcloud_data_root }}'
     - 'restorecon -Rv {{ nextcloud_web_root }}'
   when: 
-    - "'enabled' in selinux_status.stdout | lower"
+    - ansible_selinux.status == 'enabled'
     - sefcontext.changed
 
 - name: ensure SELinux boolean is set for redis
@@ -50,4 +44,4 @@
     name: httpd_can_network_connect
     state: yes
     persistent: yes
-  when: "'enabled' in selinux_status.stdout | lower"
+  when: ansible_selinux.status == 'enabled'
