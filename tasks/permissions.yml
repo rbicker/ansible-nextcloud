@@ -39,9 +39,16 @@
     - ansible_selinux.status == 'enabled'
     - sefcontext.changed
 
-- name: ensure SELinux boolean is set for redis
+- name: ensure httpd_can_network_connect SELinux boolean is on for redis
   seboolean:
     name: httpd_can_network_connect
+    state: yes
+    persistent: yes
+  when: ansible_selinux.status == 'enabled'
+
+- name: ensure httpd_execmem SELinux boolean is on
+  seboolean:
+    name: httpd_execmem
     state: yes
     persistent: yes
   when: ansible_selinux.status == 'enabled'
