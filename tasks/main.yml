@@ -154,16 +154,21 @@
     - reload nginx
   when: nextcloud_use_https
 
-- name: ensure php-fpm www.conf is present
-  copy:
-    src: www.conf
-    dest: /etc/php-fpm.d/www.conf
+- name: ensure php-fpm www.conf settings are correct
+  lineinfile:
+    path: /etc/php-fpm.d/www.conf
+    regexp: '^{{ item.name }}\s*='
+    line: '{{ item.name }} = {{ item.value }}'
+  with_items:
+    - { name: user, value: nginx }
+    - { name: group, value: nginx }
   notify: reload php-fpm
+
 
 - name: ensure opcache settings are correct
   lineinfile:
     path: /etc/php.d/opcache.ini
-    regexp: '^{{ item.name }}='
+    regexp: '^{{ item.name }}\s*='
     line: '{{ item.name }}={{ item.value }}'
   with_items:
     - { name: opcache.enable, value: 1 }
