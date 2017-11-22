@@ -19,3 +19,4 @@ nextcloud_mysql_user: nextcloud
 nextcloud_mysql_pw: nextcloud
 nextcloud_max_upload_size: 16G
 nextcloud_max_upload_time: 3600
+nextcloud_upload_tmp_dir: /nextcloud/tmp

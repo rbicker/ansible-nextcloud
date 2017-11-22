@@ -106,6 +106,7 @@
     #- { option: 'post_max_size', value: '{{ nextcloud_max_upload_size }}' }
     - { option: 'max_input_time', value: '{{ nextcloud_max_upload_time }}' }
     - { option: 'max_execution_time', value: '{{ nextcloud_max_upload_time }}' }
+    - { option: 'upload_tmp_dir', value: '{{ nextcloud_upload_tmp_dir }}' }
   notify:
     - reload php-fpm
     - reload nginx
@@ -121,6 +122,13 @@
 #    dest: /etc/redis.conf
 #  notify:
 #    - restart redis
+
+- name: ensure upload_tmp_dir directory is present
+  file:
+    path: '{{ nextcloud_upload_tmp_dir }}'
+    owner: nginx
+    group: nginx
+    state: directory
 
 - name: ensure directory for php sessions exists and has nginx as owner
   file:
