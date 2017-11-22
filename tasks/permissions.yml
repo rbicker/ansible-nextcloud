@@ -23,6 +23,7 @@
     setype: httpd_sys_rw_content_t
   with_items:
     - '{{ nextcloud_data_root }}(/.*)?'
+    - '{{ nextcloud_upload_tmp_dir }}(/.*)?'
     - '{{ nextcloud_web_root }}/config(/.*)?'
     - '{{ nextcloud_web_root }}/apps(/.*)?'
     - '{{ nextcloud_web_root }}/.htaccess'
