@@ -34,13 +34,13 @@
   become: true
   become_user: nginx
 
-- name: performance tuning - connect to redis on localhost
-  command: 'php {{ nextcloud_web_root }}/occ config:system:set redis "host" --value "localhost"'
+- name: performance tuning - connect to redis on unixsocket
+  command: 'php {{ nextcloud_web_root }}/occ config:system:set redis "host" --value "/var/run/redis/redis.sock"'
   become: true
   become_user: nginx
 
-- name: performance tuning - connect to redis on port 6379
-  command: 'php {{ nextcloud_web_root }}/occ config:system:set redis "port" --value 6379'
+- name: performance tuning - connect to redis on unixsocket, set port to 0
+  command: 'php {{ nextcloud_web_root }}/occ config:system:set redis "port" --value 0'
   become: true
   become_user: nginx
 
