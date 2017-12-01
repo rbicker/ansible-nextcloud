@@ -41,16 +41,13 @@
     - ansible_selinux.status == 'enabled'
     - sefcontext.changed
 
-- name: ensure httpd_can_network_connect SELinux boolean is on for redis
+- name: ensure sebooleans are set
   seboolean:
-    name: httpd_can_network_connect
+    name: '{{ item }}'
     state: yes
     persistent: yes
-  when: ansible_selinux.status == 'enabled'
-
-- name: ensure httpd_execmem SELinux boolean is on
-  seboolean:
-    name: httpd_execmem
-    state: yes
-    persistent: yes
+  with_items:
+    - 'httpd_can_network_connect'
+    - 'httpd_execmem'
+    - 'enable_cluster_mode'
   when: ansible_selinux.status == 'enabled'
