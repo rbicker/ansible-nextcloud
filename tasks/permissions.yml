@@ -49,5 +49,5 @@
   with_items:
     - 'httpd_can_network_connect'
     - 'httpd_execmem'
-    - 'enable_cluster_mode'
+    - 'daemons_enable_cluster_mode'
   when: ansible_selinux.status == 'enabled'
