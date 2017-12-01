@@ -35,6 +35,7 @@
   command: '{{ item  }}'
   with_items:
     - 'restorecon -Rv {{ nextcloud_data_root }}'
+    - 'restorecon -Rv {{ nextcloud_upload_tmp_dir }}'
     - 'restorecon -Rv {{ nextcloud_web_root }}'
   when: 
     - ansible_selinux.status == 'enabled'
