@@ -243,3 +243,6 @@
     job: 'php -f /var/www/nextcloud/cron.php'
 
 - import_tasks: 'permissions.yml'
+
+- import_tasks: 'upgrade.yml'
+  when: nextcloud_ugrade

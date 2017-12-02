@@ -1,0 +1,42 @@
+---
+# upgrade
+
+- name: get current nextcloud version, before upgrade
+  shell: '{{ nextcloud_web_root }}/occ -V'
+  become: true
+  become_user: nginx
+  register: nextcloud_installed_version
+  changed_when: false
+
+- name: run nextcloud's updater.phar in non-interactive way
+  shell: 'php {{ nextcloud_web_root }}/updater/updater.phar --no-interaction'
+  become: true
+  become_user: nginx
+  register: nextcloud_update_result
+  changed_when: false # unsure if upgrade has been done -> inform later
+
+- name: get current nextcloud version, after running updater.phar
+  shell: '{{ nextcloud_web_root }}/occ -V'
+  become: true
+  become_user: nginx
+  register: nextcloud_upgraded_version
+  changed_when: false
+
+- name: finish nextcloud upgrade by running occ upgrade
+  shell: '{{ nextcloud_web_root }}/occ upgrade'
+  become: true
+  become_user: nginx
+  when: nextcloud_installed_version.stdout != nextcloud_upgraded_version.stdout
+
+- name: get current nextcloud version, after occ upgrade
+  shell: '{{ nextcloud_web_root }}/occ -V'
+  become: true
+  become_user: nginx
+  register: nextcloud_upgraded_version
+  changed_when: false
+
+- name: inform about upgrade
+  debug:
+    msg: 'nextcloud version has been upgraded from {{ nextcloud_installed_version.stdout  }} to {{ nextcloud_upgraded_version.stdout }}'
+  changed_when: true
+  when: nextcloud_installed_version.stdout != nextcloud_upgraded_version.stdout

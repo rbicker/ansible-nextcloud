@@ -5,10 +5,8 @@ rbicker.nextcloud
 * install dependencies: nginx, php7.1, redis, mariadb
 * generate ssl cert (self signed) if nextcloud\_use\_https is true
 * follow best practises, performance tuning 
+* Nextcloud's updater.phar can be used to update the instance to the latest version
 
-Important:
-* php version has been upgraded from 7.0 to 7.1, if you would like to update a server which has been installed by an older version of this role, run "yum remove -y php70w\*"
-* upgrading nextcloud was removed from this role
 
 Requirements
 ------------
@@ -38,6 +36,7 @@ nextcloud_mysql_db: nextcloud # name of nextcloud mysql db
 nextcloud_mysql_user: nextcloud # username for nextcloud mysql db
 nextcloud_mysql_pw: nextcloud  # password for nextcloud mysql db
 nextcloud_hsts_options: max-age=15768000; includeSubDomains; preload; # if set, hsts will be enabled with the given options
+nextcloud_upgrade: false # if set to true, nextcloud's updater.phar is run to upgrade nextcloud to the latest version
 
 ```
 
