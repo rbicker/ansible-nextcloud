@@ -4,8 +4,11 @@
 - name: installation - ensure nextcloud is unarchived in {{ nextcloud_web_root }}
   unarchive:
     src: '{{ nextcloud_repo_url  }}/nextcloud-{{ nextcloud_version }}.tar.bz2'
+    extra_opts:
+      - '--strip-components=1'
+      - '--show-stored-names'
     remote_src: true
-    dest: '{{ nextcloud_web_root }}/..'
+    dest: '{{ nextcloud_web_root }}'
 
 - import_tasks: 'permissions.yml'
 
