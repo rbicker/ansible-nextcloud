@@ -29,7 +29,7 @@
     - '{{ nextcloud_web_root }}/.htaccess'
     - '{{ nextcloud_web_root }}/.user.ini'
   register: sefcontext
-  when: ansible_selinux.status == 'enabled'
+  when: ansible_selinux and ansible_selinux.status == 'enabled'
 
 - name: run restorecon if SELinux file context was changed
   command: '{{ item  }}'
@@ -38,7 +38,7 @@
     - 'restorecon -Rv {{ nextcloud_upload_tmp_dir }}'
     - 'restorecon -Rv {{ nextcloud_web_root }}'
   when: 
-    - ansible_selinux.status == 'enabled'
+    - ansible_selinux and ansible_selinux.status == 'enabled'
     - sefcontext.changed
 
 - name: ensure sebooleans are set
@@ -50,4 +50,4 @@
     - 'httpd_can_network_connect'
     - 'httpd_execmem'
     - 'daemons_enable_cluster_mode'
-  when: ansible_selinux.status == 'enabled'
+  when: ansible_selinux and ansible_selinux.status == 'enabled'
