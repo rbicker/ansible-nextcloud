@@ -245,4 +245,4 @@
 - import_tasks: 'permissions.yml'
 
 - import_tasks: 'upgrade.yml'
-  when: nextcloud_ugrade
+  when: nextcloud_upgrade
