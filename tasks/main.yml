@@ -240,7 +240,7 @@
     name: nextcloud           
     minute: 15                
     user: nginx               
-    job: 'php -f /var/www/nextcloud/cron.php'
+    job: 'php -f {{ nextcloud_web_root | quote }}/cron.php'
 
 - import_tasks: 'permissions.yml'
 
