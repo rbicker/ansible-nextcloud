@@ -198,6 +198,16 @@
     - { name: opcache.revalidate_freq, value: 1 }
   notify: restart php-fpm
 
+- name: ensure nginx is allowed to listen on nextcloud ports
+  seport:
+    ports: "{{ item }} "
+    proto: tcp
+    setype: http_port_t
+    state: present
+  with_items:
+    - "{{ nextcloud_http_port }}"
+    - "{{ nextcloud_https_port }}"
+
 - name: ensure nginx, php-fpm and redis are enabled and running
   service:
     name: '{{ item }}'
