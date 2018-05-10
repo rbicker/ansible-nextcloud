@@ -207,6 +207,7 @@
   with_items:
     - "{{ nextcloud_http_port }}"
     - "{{ nextcloud_https_port }}"
+  when: ansible_selinux and ansible_selinux.status == 'enabled'
 
 - name: ensure nginx, php-fpm and redis are enabled and running
   service:
