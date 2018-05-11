@@ -22,3 +22,5 @@ nextcloud_max_upload_size: 16G
 nextcloud_max_upload_time: 3600
 nextcloud_upload_tmp_dir: /nextcloud/tmp
 nextcloud_upgrade: false
+nextcloud_http_port: 80
+nextcloud_https_port: 443
