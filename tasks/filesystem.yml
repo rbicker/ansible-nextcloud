@@ -1,0 +1,13 @@
+---
+# perform fixes on filesystem (selinux, perms,
+# configuration inside nextcloud_web_root)
+
+- name: ensure .user.ini config is present
+  template:
+    src: user.ini.j2
+    dest: '{{ nextcloud_web_root }}/.user.ini'
+  notify:
+    - reload nginx
+    - reload php-fpm
+
+- import_tasks: 'permissions.yml'

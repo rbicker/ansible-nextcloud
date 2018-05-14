@@ -238,22 +238,16 @@
 - import_tasks: 'installation.yml'
   when: new_installation.changed
 
-- name: ensure .user.ini config is present
-  template:
-    src: user.ini.j2
-    dest: '{{ nextcloud_web_root }}/.user.ini'
-  notify:
-    - reload nginx
-    - reload php-fpm
-
-- name: performance tuning - ensure the nextcloud cronjob exists and runs every 15 min         
-  cron:               
-    name: nextcloud           
-    minute: 15                
-    user: nginx               
-    job: 'php -f {{ nextcloud_web_root | quote }}/cron.php'
-
-- import_tasks: 'permissions.yml'
-
 - import_tasks: 'upgrade.yml'
   when: nextcloud_upgrade
+
+# call filesystem checks if not done by previous tasks
+- import_tasks: filesystem.yml
+  when: not new_installation.changed and not new_installation.changed
+
+- name: performance tuning - ensure the nextcloud cronjob exists and runs every 15 min
+  cron:
+    name: nextcloud
+    minute: 15
+    user: nginx
+    job: 'php -f {{ nextcloud_web_root | quote }}/cron.php'
