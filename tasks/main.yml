@@ -201,6 +201,7 @@
   with_items:
     - { name: user, value: nginx }
     - { name: group, value: nginx }
+    - { name: clear_env, value: no }
   notify: reload php-fpm
 
 
