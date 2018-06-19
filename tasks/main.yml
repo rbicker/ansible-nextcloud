@@ -19,7 +19,6 @@
     - lbzip2-utils
     - nginx
     - openssl
-    - mariadb-server
     - MySQL-python
     - redis
     - php71w-fpm
@@ -39,6 +38,27 @@
     - php71w-pecl-imagick
     - php71w-process # posix
     - libreoffice
+
+- name: ensure mariadb-server is installed
+  yum:
+    name: mariadb-server
+  register: mariadb_installation
+
+- name: perform some mysql optimization if dbserver is installed by this role
+  lineinfile:
+    path: /etc/my.cnf.d/server.cnf
+    regexp: '^{{ item.option }}'
+    line: '{{ item.option }}={{ item.value }}'
+    insertafter: '\[mysqld\]'
+  with_items:
+    - { option: ignore-db-dir, value: lost+found }
+    - { option: innodb_file_per_table, value: 1 }
+    - { option: explicit_defaults_for_timestamp, value: 1 }
+    - { option: default-storage-engine, value: InnoDB }
+    - { option: innodb_buffer_pool_size , value: 4G }
+    - { option: innodb_log_file_size, value: 2G }
+    - { option: bind-address, value: 127.0.0.1 }
+  when: mariadb_installation.changed
 
 - name: ensure mysql binary logging is disabled
   lineinfile:
