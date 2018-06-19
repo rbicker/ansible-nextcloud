@@ -243,7 +243,7 @@
 
 # call filesystem checks if not done by previous tasks
 - import_tasks: filesystem.yml
-  when: not new_installation.changed and not new_installation.changed
+  when: not new_installation.changed and not nextcloud_upgrade
 
 - name: performance tuning - ensure the nextcloud cronjob exists and runs every 15 min
   cron:
