@@ -15,7 +15,7 @@
   register: nextcloud_update_result
   changed_when: false # unsure if upgrade has been done -> inform later
 
-- import_tasks: filesystem.yml
+- import_tasks: permissions.yml
 
 - name: get current nextcloud version, after running updater.phar
   shell: '{{ nextcloud_web_root }}/occ -V'

@@ -93,26 +93,10 @@
     priv: '{{ nextcloud_mysql_db }}.*:ALL,GRANT'
     state: present
 
-- name: ensure php version is hidden
-  lineinfile:
-    path: /etc/php.ini
-    regexp: '^expose_php'
-    line: 'expose_php = Off'    
-  notify:
-    - reload php-fpm
-    - reload nginx
-    
 - name: ensure pdo_mysql.ini config is present
   copy:
     src: pdo_mysql.ini
     dest: /etc/php.d/pdo_mysql.ini
-
-#- name: ensure redis.conf is present
-#  copy:
-#    src: redis.conf
-#    dest: /etc/redis.conf
-#  notify:
-#    - restart redis
 
 - name: ensure directory for php sessions exists and has nginx as owner
   file:
@@ -176,11 +160,6 @@
     - php-fpm
     - nginx
     - redis
-
-#- name: ensure working dir is present
-#  file:
-#    path: '{{ nextcloud_working_dir }}'
-#    state: directory
 
 - name: ensure alias for the occ command exists in /root/.bashrc
   lineinfile:
