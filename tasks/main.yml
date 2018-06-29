@@ -38,6 +38,7 @@
     - php71w-pecl-imagick
     - php71w-process # posix
     - libreoffice
+    - jq
 
 - name: ensure mariadb-server is installed
   yum:
