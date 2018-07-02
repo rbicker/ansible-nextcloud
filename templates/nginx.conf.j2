@@ -14,7 +14,9 @@ server {
 server {
     listen {{ nextcloud_https_port }} ssl http2 default_server;
     server_name {{ nextcloud_domain }};
-
+{% if nextcloud_fastcgi_temp_path is defined %}
+   fastcgi_temp_path {{ nextcloud_fastcgi_temp_path }};
+{% endif %}
     ssl_certificate {{ nextcloud_ssl_cert }};
     ssl_certificate_key {{ nextcloud_ssl_key }};
 
