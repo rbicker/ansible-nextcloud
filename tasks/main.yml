@@ -56,7 +56,7 @@
     - { option: innodb_file_per_table, value: 1 }
     - { option: explicit_defaults_for_timestamp, value: 1 }
     - { option: default-storage-engine, value: InnoDB }
-    - { option: innodb_buffer_pool_size , value: 4G }
+    - { option: innodb_buffer_pool_size, value: 4G }
     - { option: innodb_log_file_size, value: 2G }
     - { option: bind-address, value: 127.0.0.1 }
   when: mariadb_installation.changed
