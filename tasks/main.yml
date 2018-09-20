@@ -8,6 +8,7 @@
   with_items:
     - epel-release
     - https://mirror.webtatic.com/yum/el7/webtatic-release.rpm
+  when: nextcloud_manage_yum_repos
 
 - name: ensure required packages are installed
   yum:
