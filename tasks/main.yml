@@ -197,7 +197,7 @@
 - name: ensure php-fpm www.conf settings are correct
   lineinfile:
     path: /etc/php-fpm.d/www.conf
-    regexp: '^{{ item.name }}\s*='
+    regexp: '^;?{{ item.name }}\s*='
     line: '{{ item.name }} = {{ item.value }}'
   with_items:
     - { name: user, value: nginx }
