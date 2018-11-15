@@ -17,6 +17,8 @@ server {
 {% if nextcloud_fastcgi_temp_path is defined %}
    fastcgi_temp_path {{ nextcloud_fastcgi_temp_path }};
 {% endif %}
+    proxy_buffering off;
+    client_body_temp_path {{ nextcloud_upload_tmp_dir }};
     ssl_certificate {{ nextcloud_ssl_cert }};
     ssl_certificate_key {{ nextcloud_ssl_key }};
 

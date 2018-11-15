@@ -24,3 +24,4 @@ nextcloud_upload_tmp_dir: /nextcloud/tmp
 nextcloud_upgrade: false
 nextcloud_http_port: 80
 nextcloud_https_port: 443
+nextcloud_manage_yum_repos: true
