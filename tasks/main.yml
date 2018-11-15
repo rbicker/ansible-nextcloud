@@ -163,6 +163,14 @@
     group: nginx
     state: directory
 
+- name: ensure nextcloud_fastcgi_temp_dir directory exists and has nginx as owner
+  file:
+    path: '{{ nextcloud_fastcgi_temp_dir }}'
+    owner: nginx
+    group: nginx
+    state: directory
+  when: nextcloud_fastcgi_temp_dir is defined
+
 - name: ensure directory for php sessions exists and has nginx as owner
   file:
     path: /var/lib/php/session
@@ -279,3 +287,12 @@
   with_items:
     - { option: 'upload_max_filesize', value: '{{ nextcloud_max_upload_size }}' } 
     - { option: 'post_max_size', value: '{{ nextcloud_max_upload_size }}' }
+
+- name: ensure additional options are set in config.php if defined
+  lineinfile:
+    path: '{{ nextcloud_web_root }}/config/config.php' 
+    regexp: '^\s*''{{ item.option }}'''
+    line: '  ''{{ item.option }}'' => {{ item.value }},'
+    insertafter: '\$CONFIG'
+  with_items: '{{ nextcloud_config_options }}'
+  when: nextcloud_config_options is defined

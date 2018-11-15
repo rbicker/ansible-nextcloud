@@ -14,8 +14,8 @@ server {
 server {
     listen {{ nextcloud_https_port }} ssl http2 default_server;
     server_name {{ nextcloud_domain }};
-{% if nextcloud_fastcgi_temp_path is defined %}
-   fastcgi_temp_path {{ nextcloud_fastcgi_temp_path }};
+{% if nextcloud_fastcgi_temp_dir is defined %}
+   fastcgi_temp_path {{ nextcloud_fastcgi_temp_dir }} 1 2;
 {% endif %}
     proxy_buffering off;
     client_body_temp_path {{ nextcloud_upload_tmp_dir }};
