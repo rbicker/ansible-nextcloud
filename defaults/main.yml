@@ -3,7 +3,7 @@
 
 mysql_root_pw: secret
 nextcloud_repo_url: https://download.nextcloud.com/server/releases
-nextcloud_version: 13.0.4
+nextcloud_version: latest
 nextcloud_use_https: true
 nextcloud_domain: nextcloud.mydomain.com
 nextcloud_trusted_domains: ['localhost', '{{ nextcloud_domain }}']

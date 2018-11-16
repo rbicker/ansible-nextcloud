@@ -3,43 +3,41 @@
 
 - name: ensure epel-relase and webtatic yum repos are installed
   yum:
-    name: '{{ item }}'
+    name:
+      - epel-release
+      - https://mirror.webtatic.com/yum/el7/webtatic-release.rpm
     state: present
-  with_items:
-    - epel-release
-    - https://mirror.webtatic.com/yum/el7/webtatic-release.rpm
   when: nextcloud_manage_yum_repos
 
 - name: ensure required packages are installed
   yum:
-    name: '{{ item }}'
-  with_items:
-    - crontabs
-    - libselinux-python
-    - policycoreutils-python
-    - lbzip2-utils
-    - nginx
-    - openssl
-    - MySQL-python
-    - redis
-    - php71w-fpm
-    - php71w-opcache
-    - php71w-common # ctype, iconv, json, libxml, simplexml, zip, zlib, curl, fileinfo, bz2, openssl, ftp, exif, gmp
-    - php71w-xml
-    - php71w-gd 
-    - php71w-xml # dom, xmlreader, xmlwriter
-    - php71w-mbstring 
-    - php71w-intl # intl
-    - php71w-mcrypt
-    - php71w-mysql
-    - php71w-ldap
-    - php71w-imap
-    - php71w-pecl-apcu 
-    - php71w-pecl-redis
-    - php71w-pecl-imagick
-    - php71w-process # posix
-    - libreoffice
-    - jq
+    name: 
+      - crontabs
+      - libselinux-python
+      - policycoreutils-python
+      - lbzip2-utils
+      - nginx
+      - openssl
+      - MySQL-python
+      - redis
+      - php71w-fpm
+      - php71w-opcache
+      - php71w-common # ctype, iconv, json, libxml, simplexml, zip, zlib, curl, fileinfo, bz2, openssl, ftp, exif, gmp
+      - php71w-xml
+      - php71w-gd
+      - php71w-xml # dom, xmlreader, xmlwriter
+      - php71w-mbstring
+      - php71w-intl # intl
+      - php71w-mcrypt
+      - php71w-mysql
+      - php71w-ldap
+      - php71w-imap
+      - php71w-pecl-apcu
+      - php71w-pecl-redis
+      - php71w-pecl-imagick
+      - php71w-process # posix
+      - libreoffice
+      - jq
 
 - name: ensure mariadb-server is installed
   yum:

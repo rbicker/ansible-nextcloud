@@ -1,7 +1,8 @@
 rbicker.nextcloud
 =================
 
-* install nextcloud (13) on centos 7
+* install nextcloud on centos 7
+* tested for versions 12 - 14
 * install dependencies: nginx, php7.1, redis, mariadb
 * generate ssl cert (self signed) if nextcloud\_use\_https is true
 * follow best practises, performance tuning 
@@ -11,7 +12,7 @@ rbicker.nextcloud
 Requirements
 ------------
 
-* Currently only tested with centos 7.3 - 7.5
+* Currently only tested on centos 7.3 - 7.5
 
 Role Variables
 --------------
@@ -20,12 +21,12 @@ Role Variables
 nextcloud_domain: nextcloud.mydomain.com # domain used in nginx and nextcloud version (REQUIRED)
 mysql_root_pw: secret # root password for 
 nextcloud_repo_url: https://download.nextcloud.com/server/releases # where to get the nextcloud archive
-nextcloud_version: 13.0.0 # version to install
+nextcloud_version: nextcloud-14.0.3 # version to install, choose any from https://download.nextcloud.com/server/releases/ without the file extion (default: latest)
 nextcloud_use_https: true # set to false if you want to run your instance behind a loadbalancer with ssl-termination
-nextcloud_ssl_cert: /etc/nginx/nextcloud.crt # self-signed ssl cert path
+nextcloud_ssl_cert: /etc/nginx/nextcloud.crt # ssl cert path
 nextcloud_ssl_key: /etc/nginx/nextcloud.key # ssl key path
 nextcloud_ssl_skip_gen: false # set to true if you do NOT want role to handle ssl cert generation (then you must provide nextcloud_ssl_* configured files)
-nextcloud_ssl_subject: '/C=CH/ST=Lucerne/L=Lucerne/O=/CN={{ nextcloud_domain }}' # subject for ssl cert
+nextcloud_ssl_subject: '/C=CH/ST=Lucerne/L=Lucerne/O=/CN={{ nextcloud_domain }}' # subject for self-signed ssl cert generation
 nextcloud_web_root: /var/www/nextcloud # web root 
 nextcloud_data_root: '/nextcloud/data'
 nextcloud_admin_user: admin # nextcloud admin username
@@ -43,7 +44,17 @@ nextcloud_https_port: 443 # https port
 nextcloud_manage_yum_repos: true # configure epel & webtatic yum repositories
 nextcloud_config_options: # additional options to set in config.php
  - { option: overwrite.cli.url, value: "'https://nextcloud.mydomain.com'" }
- - { option: knowledgebaseenabled, value: false }
+ - { option: mail_smtpmode, value: "'smtp'" }
+ - { option: mail_smtpsecure, value: "'ssl'" }
+ - { option: mail_domain, value: "'gmail'" }
+ - { option: mail_smtphost, value: "'smtp.gmail.com'" }
+ - { option: mail_from_address, value: "'john.smith'" }
+ - { option: mail_smtpauthtype, value: "'LOGIN'" }
+ - { option: mail_smtpauth, value: 1 }
+ - { option: mail_smtpport, value: "'465'" }
+ - { option: mail_smtpname, value: "'john.smith'" }
+ - { option: mail_smtppassword, value: "'secret123'" }
+
 ```
 
 Example Playbook
@@ -58,5 +69,5 @@ Example Playbook
 License
 -------
 
-BSD
+MIT
 
