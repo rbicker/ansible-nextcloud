@@ -41,6 +41,7 @@ nextcloud_max_upload_time: 3600 # max upload time
 nextcloud_upload_tmp_dir: /nextcloud/tmp # php tmp directory
 nextcloud_http_port: 80 # http port
 nextcloud_https_port: 443 # https port
+nextcloud_php_memory_limit: 512M # memory_limit in php.ini
 nextcloud_manage_yum_repos: true # configure epel & webtatic yum repositories
 nextcloud_config_options: # additional options to set in config.php
  - { option: overwrite.cli.url, value: "'https://nextcloud.mydomain.com'" }

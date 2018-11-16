@@ -25,3 +25,4 @@ nextcloud_upgrade: false
 nextcloud_http_port: 80
 nextcloud_https_port: 443
 nextcloud_manage_yum_repos: true
+nextcloud_php_memory_limit: 512M
