@@ -41,6 +41,13 @@
     - ansible_selinux and ansible_selinux.status == 'enabled'
     - sefcontext.changed
 
+- name: Set selinux policy for fastcgi temp directory
+  sefcontext:
+    target: '{{ nextcloud_fastcgi_temp_dir }}(/.*)?'
+    setype: httpd_cache_t
+    reload: yes
+  when: nextcloud_fastcgi_temp_dir is defined
+
 - name: ensure sebooleans are set
   seboolean:
     name: '{{ item }}'
