@@ -1,6 +1,7 @@
 ---
 # defaults file for rbicker.nextcloud
 
+mysql_root_pw_modify: true
 mysql_root_pw: secret
 nextcloud_repo_url: https://download.nextcloud.com/server/releases
 nextcloud_version: latest

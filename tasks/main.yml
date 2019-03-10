@@ -79,6 +79,7 @@
     login_user: root
     name: root
     password: '{{ mysql_root_pw }}'
+  when: mysql_root_pw_modify
 
 - name: ensure /root/.my.cnf is present
   template:
@@ -88,6 +89,7 @@
     group: root
     mode: '0600'
     force: no # don't overwrite, only create if not exists
+  when: mysql_root_pw_modify
 
 - name: ensure anonymous mysql user is absent
   mysql_user:
