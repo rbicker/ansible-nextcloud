@@ -23,7 +23,6 @@
       - php71w-fpm
       - php71w-opcache
       - php71w-common # ctype, iconv, json, libxml, simplexml, zip, zlib, curl, fileinfo, bz2, openssl, ftp, exif, gmp
-      - php71w-xml
       - php71w-gd
       - php71w-xml # dom, xmlreader, xmlwriter
       - php71w-mbstring
