@@ -177,7 +177,7 @@
     group: nginx
     state: directory
 
-- name: enusre /etc/nginx/nginx.conf is present
+- name: ensure /etc/nginx/nginx.conf is present
   copy:
     src: nginx.conf
     dest: /etc/nginx/nginx.conf
