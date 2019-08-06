@@ -23,7 +23,6 @@
       - php71w-fpm
       - php71w-opcache
       - php71w-common # ctype, iconv, json, libxml, simplexml, zip, zlib, curl, fileinfo, bz2, openssl, ftp, exif, gmp
-      - php71w-xml
       - php71w-gd
       - php71w-xml # dom, xmlreader, xmlwriter
       - php71w-mbstring
@@ -79,6 +78,7 @@
     login_user: root
     name: root
     password: '{{ mysql_root_pw }}'
+  when: mysql_root_pw_modify
 
 - name: ensure /root/.my.cnf is present
   template:
@@ -88,6 +88,7 @@
     group: root
     mode: '0600'
     force: no # don't overwrite, only create if not exists
+  when: mysql_root_pw_modify
 
 - name: ensure anonymous mysql user is absent
   mysql_user:
@@ -177,7 +178,7 @@
     group: nginx
     state: directory
 
-- name: enusre /etc/nginx/nginx.conf is present
+- name: ensure /etc/nginx/nginx.conf is present
   copy:
     src: nginx.conf
     dest: /etc/nginx/nginx.conf

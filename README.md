@@ -19,7 +19,8 @@ Role Variables
 
 ```
 nextcloud_domain: nextcloud.mydomain.com # domain used in nginx and nextcloud version (REQUIRED)
-mysql_root_pw: secret # root password for 
+mysql_root_pw_modify: true # set to false if you do NOT want to modify the mysql root password
+mysql_root_pw: secret # root password for mysql
 nextcloud_repo_url: https://download.nextcloud.com/server/releases # where to get the nextcloud archive
 nextcloud_version: nextcloud-14.0.3 # version to install, choose any from https://download.nextcloud.com/server/releases/ without the file extion (default: latest)
 nextcloud_use_https: true # set to false if you want to run your instance behind a loadbalancer with ssl-termination
