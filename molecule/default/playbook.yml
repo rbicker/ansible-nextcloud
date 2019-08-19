@@ -1,0 +1,9 @@
+---
+- name: Converge
+  hosts: all
+  roles:
+    - role: rbicker.nextcloud
+  vars:
+    nextcloud_admin_user: admin
+    nextcloud_admin_pw: test
+    nextcloud_use_https: false

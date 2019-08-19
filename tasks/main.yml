@@ -11,7 +11,7 @@
 
 - name: ensure required packages are installed
   yum:
-    name: 
+    name:
       - crontabs
       - libselinux-python
       - policycoreutils-python
@@ -22,11 +22,11 @@
       - redis
       - php71w-fpm
       - php71w-opcache
-      - php71w-common # ctype, iconv, json, libxml, simplexml, zip, zlib, curl, fileinfo, bz2, openssl, ftp, exif, gmp
+      - php71w-common  # ctype, iconv, json, libxml, simplexml, zip, zlib, curl, fileinfo, bz2, openssl, ftp, exif, gmp
       - php71w-gd
-      - php71w-xml # dom, xmlreader, xmlwriter
+      - php71w-xml  # dom, xmlreader, xmlwriter
       - php71w-mbstring
-      - php71w-intl # intl
+      - php71w-intl  # intl
       - php71w-mcrypt
       - php71w-mysql
       - php71w-ldap
@@ -34,36 +34,20 @@
       - php71w-pecl-apcu
       - php71w-pecl-redis
       - php71w-pecl-imagick
-      - php71w-process # posix
+      - php71w-process  # posix
       - libreoffice
       - jq
 
 - name: ensure mariadb-server is installed
   yum:
     name: mariadb-server
-  register: mariadb_installation
-
-- name: perform some mysql optimization if dbserver is installed by this role
-  lineinfile:
-    path: /etc/my.cnf.d/server.cnf
-    regexp: '^{{ item.option }}'
-    line: '{{ item.option }}={{ item.value }}'
-    insertafter: '\[mysqld\]'
-  with_items:
-    - { option: ignore-db-dir, value: lost+found }
-    - { option: innodb_file_per_table, value: 1 }
-#    - { option: explicit_defaults_for_timestamp, value: 1 } # only valid if mysql version >=5.6 and will be deprecated in future releases
-    - { option: default-storage-engine, value: InnoDB }
-    - { option: innodb_buffer_pool_size, value: 4G }
-    - { option: innodb_log_file_size, value: 2G }
-    - { option: bind-address, value: 127.0.0.1 }
-  when: mariadb_installation.changed
+  notify: mysql optimization
 
 - name: ensure mysql binary logging is disabled
   lineinfile:
     path: /etc/my.cnf.d/server.cnf
     state: absent
-    regexp: '^log-bin$' 
+    regexp: '^log-bin$'
   notify:
     - restart mariadb
 
@@ -87,7 +71,7 @@
     owner: root
     group: root
     mode: '0600'
-    force: no # don't overwrite, only create if not exists
+    force: no  # don't overwrite, only create if not exists
   when: mysql_root_pw_modify
 
 - name: ensure anonymous mysql user is absent
@@ -109,7 +93,7 @@
     login_user: root
     state: present
 
-- name: ensure database user {{ nextcloud_mysql_user }} exists and has all privileges  on {{ nextcloud_mysql_db }}
+- name: ensure database user {{ nextcloud_mysql_user }} exists and has all privileges on {{ nextcloud_mysql_db }}
   mysql_user:
     name: '{{ nextcloud_mysql_user }}'
     password: '{{ nextcloud_mysql_pw }}'
@@ -121,19 +105,19 @@
   lineinfile:
     path: /etc/php.ini
     regexp: '^{{ item.option }}'
-    line: '{{ item.option }} = {{ item.value }}'    
+    line: '{{ item.option }} = {{ item.value }}'
   with_items:
     - { option: 'expose_php', value: 'Off' }
-    #- { option: 'upload_max_filesize', value: '{{ nextcloud_max_upload_size }}' } # -> .user.ini
-    #- { option: 'post_max_size', value: '{{ nextcloud_max_upload_size }}' } # -> .user.ini
+    # - { option: 'upload_max_filesize', value: '{{ nextcloud_max_upload_size }}' } # -> .user.ini
+    # - { option: 'post_max_size', value: '{{ nextcloud_max_upload_size }}' } # -> .user.ini
     - { option: 'max_input_time', value: '{{ nextcloud_max_upload_time }}' }
     - { option: 'max_execution_time', value: '{{ nextcloud_max_upload_time }}' }
     - { option: 'upload_tmp_dir', value: '{{ nextcloud_upload_tmp_dir }}' }
-    - { option: 'memory_limit', value:  '{{ nextcloud_php_memory_limit }}' }
+    - { option: 'memory_limit', value: '{{ nextcloud_php_memory_limit }}' }
   notify:
     - reload php-fpm
     - reload nginx
-    
+
 - name: ensure pdo_mysql.ini config is present
   copy:
     src: pdo_mysql.ini
@@ -194,12 +178,17 @@
   template:
     src: nginx.conf.j2
     dest: /etc/nginx/conf.d/nextcloud.conf
-  notify: 
+  notify:
     - reload nginx
 
 - name: ensure ssl key and cert are present
-  command: 'openssl req -new -nodes -x509 -subj {{ nextcloud_ssl_subject }} -days 3650 -keyout {{ nextcloud_ssl_key }} -out {{nextcloud_ssl_cert }} -extensions v3_ca creates={{ nextcloud_ssl_cert }}'
-  notify: 
+  command: >
+    openssl req -new -nodes -x509 -subj {{ nextcloud_ssl_subject }}
+    -days 3650 -keyout {{ nextcloud_ssl_key }} -out {{ nextcloud_ssl_cert }}
+    -extensions v3_ca
+  args:
+    creates: '{{ nextcloud_ssl_cert }}'
+  notify:
     - reload nginx
   when: nextcloud_use_https and not nextcloud_ssl_skip_gen
 
@@ -285,12 +274,12 @@
     regexp: '^{{ item.option }}'
     line: '{{ item.option }}={{ item.value }}'
   with_items:
-    - { option: 'upload_max_filesize', value: '{{ nextcloud_max_upload_size }}' } 
+    - { option: 'upload_max_filesize', value: '{{ nextcloud_max_upload_size }}' }
     - { option: 'post_max_size', value: '{{ nextcloud_max_upload_size }}' }
 
 - name: ensure additional options are set in config.php if defined
   lineinfile:
-    path: '{{ nextcloud_web_root }}/config/config.php' 
+    path: '{{ nextcloud_web_root }}/config/config.php'
     regexp: '^\s*''{{ item.option }}'''
     line: '  ''{{ item.option }}'' => {{ item.value }},'
     insertafter: '\$CONFIG'

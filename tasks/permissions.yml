@@ -37,7 +37,7 @@
     - 'restorecon -Rv {{ nextcloud_data_root }}'
     - 'restorecon -Rv {{ nextcloud_upload_tmp_dir }}'
     - 'restorecon -Rv {{ nextcloud_web_root }}'
-  when: 
+  when:
     - ansible_selinux and ansible_selinux.status == 'enabled'
     - sefcontext.changed
 
