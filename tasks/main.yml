@@ -25,7 +25,7 @@
       - php72w-common  # ctype, iconv, json, libxml, simplexml, zip, zlib, curl, fileinfo, bz2, openssl, ftp, exif, gmp
       - php72w-gd
       - php72w-xml  # dom, xmlreader, xmlwriter
-      - php72w-mbstring0
+      - php72w-mbstring
       - php72w-intl  # intl
       - php72w-mcrypt
       - php72w-mysql
