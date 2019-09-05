@@ -27,7 +27,6 @@
       - php72w-xml  # dom, xmlreader, xmlwriter
       - php72w-mbstring
       - php72w-intl  # intl
-      - php72w-mcrypt
       - php72w-mysql
       - php72w-ldap
       - php72w-imap
