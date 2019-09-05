@@ -12,7 +12,7 @@ rbicker.nextcloud
 Requirements
 ------------
 
-* Currently only tested on centos 7.3 - 7.5
+* Currently only tested on centos 7.3 - 7.6
 
 Role Variables
 --------------
