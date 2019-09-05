@@ -14,11 +14,7 @@ server {
 server {
     listen {{ nextcloud_https_port }} ssl http2 default_server;
     server_name {{ nextcloud_domain }};
-{% if nextcloud_fastcgi_temp_dir is defined %}
-   fastcgi_temp_path {{ nextcloud_fastcgi_temp_dir }} 1 2;
-{% endif %}
-    proxy_buffering off;
-    client_body_temp_path {{ nextcloud_upload_tmp_dir }};
+    
     ssl_certificate {{ nextcloud_ssl_cert }};
     ssl_certificate_key {{ nextcloud_ssl_key }};
 
@@ -47,6 +43,11 @@ server {
     # in all major browsers and getting removed from this list
     # could take several months.
 
+{% if nextcloud_fastcgi_temp_dir is defined %}
+   fastcgi_temp_path {{ nextcloud_fastcgi_temp_dir }} 1 2;
+{% endif %}
+    proxy_buffering off;
+    client_body_temp_path {{ nextcloud_upload_tmp_dir }};
 
     add_header X-Content-Type-Options nosniff;
     add_header X-XSS-Protection "1; mode=block";
@@ -54,9 +55,6 @@ server {
     add_header X-Download-Options noopen;
     add_header X-Permitted-Cross-Domain-Policies none;
     add_header Referrer-Policy no-referrer;
-
-    # Remove X-Powered-By, which is an information leak
-    fastcgi_hide_header X-Powered-By;
 
     # Remove X-Powered-By, which is an information leak
     fastcgi_hide_header X-Powered-By;
