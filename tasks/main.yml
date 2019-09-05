@@ -34,7 +34,6 @@
       - php72w-pecl-redis
       - php72w-pecl-imagick
       - php72w-process  # posix
-      - libreoffice
       - jq
 
 - name: ensure mariadb-server is installed
