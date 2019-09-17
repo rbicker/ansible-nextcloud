@@ -38,12 +38,6 @@
   become_user: nginx
   changed_when: true
 
-- name: performance tuning - use redis for file locking
-  command: 'php {{ nextcloud_web_root }}/occ config:system:set memcache.locking --value "\OC\Memcache\Redis"'
-  become: true
-  become_user: nginx
-  changed_when: true
-
 - name: performance tuning - connect to redis on unixsocket
   command: 'php {{ nextcloud_web_root }}/occ config:system:set redis "host" --value "/var/run/redis/redis.sock"'
   become: true
@@ -52,6 +46,12 @@
 
 - name: performance tuning - connect to redis on unixsocket, set port to 0
   command: 'php {{ nextcloud_web_root }}/occ config:system:set redis "port" --value 0'
+  become: true
+  become_user: nginx
+  changed_when: true
+
+- name: performance tuning - use redis for file locking
+  command: 'php {{ nextcloud_web_root }}/occ config:system:set memcache.locking --value "\OC\Memcache\Redis"'
   become: true
   become_user: nginx
   changed_when: true

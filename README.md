@@ -2,10 +2,10 @@ rbicker.nextcloud
 =================
 
 * install nextcloud on centos 7
-* tested for versions 12 - 14
-* install dependencies: nginx, php7.2, redis, mariadb
+* tested for versions 12 - 16
+* install dependencies: nginx, php7.3, redis, mariadb
 * generate ssl cert (self signed) if nextcloud\_use\_https is true
-* follow best practises, performance tuning 
+* follow best practices, performance tuning 
 * Nextcloud's updater.phar can be used to update the instance to the latest version
 
 
@@ -43,7 +43,7 @@ nextcloud_upload_tmp_dir: /nextcloud/tmp # php tmp directory
 nextcloud_http_port: 80 # http port
 nextcloud_https_port: 443 # https port
 nextcloud_php_memory_limit: 512M # memory_limit in php.ini
-nextcloud_manage_yum_repos: true # configure epel & webtatic yum repositories
+nextcloud_manage_yum_repos: true # configure epel, Remi and MariaDB yum repositories
 nextcloud_config_options: # additional options to set in config.php
  - { option: overwrite.cli.url, value: "'https://nextcloud.mydomain.com'" }
  - { option: mail_smtpmode, value: "'smtp'" }

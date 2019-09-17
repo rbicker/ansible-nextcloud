@@ -1,15 +1,34 @@
 ---
 # task file for rbicker.nextcloud
 
-- name: ensure epel-relase and webtatic yum repos are installed
+- name: ensure epel-relase and Remi yum repos are installed
   yum:
     name:
       - epel-release
-      - https://mirror.webtatic.com/yum/el7/webtatic-release.rpm
+      - https://rpms.remirepo.net/enterprise/remi-release-{{ ansible_distribution_major_version }}.rpm
     state: present
   when: nextcloud_manage_yum_repos
 
-- name: ensure required packages are installed
+- name: add MariaDB repo
+  yum_repository:
+    name: mariadb
+    description: Extra Packages for Enterprise Linux 7 - $basearch
+    baseurl: http://yum.mariadb.org/{{ mariadb_version }}/centos{{ ansible_distribution_major_version|int }}-amd64
+    gpgkey: https://yum.mariadb.org/RPM-GPG-KEY-MariaDB
+    gpgcheck: yes
+    enabled: 1
+
+- name: ensure all PHP repos are disabled  # noqa 301
+  command: yum-config-manager --disable remi-php*
+  changed_when: no
+  when: nextcloud_manage_yum_repos
+
+- name: ensure correct PHP repo is enabled  # noqa 301
+  command: yum-config-manager --enable remi-{{ php_version }}
+  changed_when: no
+  when: nextcloud_manage_yum_repos
+
+- name: ensure required packages are installed  # noqa 403
   yum:
     name:
       - crontabs
@@ -20,25 +39,30 @@
       - openssl
       - MySQL-python
       - redis
-      - php72w-fpm
-      - php72w-opcache
-      - php72w-common  # ctype, iconv, json, libxml, simplexml, zip, zlib, curl, fileinfo, bz2, openssl, ftp, exif, gmp
-      - php72w-gd
-      - php72w-xml  # dom, xmlreader, xmlwriter
-      - php72w-mbstring
-      - php72w-intl  # intl
-      - php72w-mysql
-      - php72w-ldap
-      - php72w-imap
-      - php72w-pecl-apcu
-      - php72w-pecl-redis
-      - php72w-pecl-imagick
-      - php72w-process  # posix
+      - php
+      - php-fpm
+      - php-opcache
+      - php-common  # ctype, iconv, json, libxml, simplexml, zip, zlib, curl, fileinfo, bz2, openssl, ftp, exif, gmp
+      - php-gd
+      - php-xml  # dom, xmlreader, xmlwriter
+      - php-mbstring
+      - php-intl  # intl
+      - php-mysqlnd
+      - php-ldap
+      - php-imap
+      - php-pecl-apcu
+      - php-pecl-redis
+      - php-pecl-imagick
+      - php-pecl-zip
+      - php-process  # posix
       - jq
+    state: latest
 
-- name: ensure mariadb-server is installed
+- name: ensure mariadb-server is installed  # noqa 403
   yum:
     name: mariadb-server
+    enablerepo: mariadb
+    state: latest
   notify: mysql optimization
 
 - name: ensure mysql binary logging is disabled
@@ -119,7 +143,7 @@
 - name: ensure pdo_mysql.ini config is present
   copy:
     src: pdo_mysql.ini
-    dest: /etc/php.d/pdo_mysql.ini
+    dest: /etc/php.d/30-pdo_mysql.ini
 
 - name: ensure redis options are set
   lineinfile:
@@ -204,7 +228,7 @@
 
 - name: ensure opcache settings are correct
   lineinfile:
-    path: /etc/php.d/opcache.ini
+    path: /etc/php.d/10-opcache.ini
     regexp: '^{{ item.name }}\s*='
     line: '{{ item.name }}={{ item.value }}'
   with_items:
@@ -259,10 +283,10 @@
 - import_tasks: permissions.yml
   when: not new_installation.changed and not nextcloud_upgrade
 
-- name: performance tuning - ensure the nextcloud cronjob exists and runs every 15 min
+- name: performance tuning - ensure the nextcloud cronjob exists and runs every 5 min
   cron:
     name: nextcloud
-    minute: 15
+    minute: "*/5"
     user: nginx
     job: 'php -f {{ nextcloud_web_root | quote }}/cron.php'
 

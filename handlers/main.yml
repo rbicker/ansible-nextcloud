@@ -37,6 +37,10 @@
     - { option: innodb_file_per_table, value: 1 }
     # - { option: explicit_defaults_for_timestamp, value: 1 } # only valid if mysql version >=5.6 and will be deprecated in future releases
     - { option: default-storage-engine, value: InnoDB }
+    - { option: innodb_large_prefix, value: "true" }
+    - { option: innodb_file_format, value: barracuda }
+    - { option: innodb_file_per_table, value: 1 }
     - { option: innodb_buffer_pool_size, value: 4G }
     - { option: innodb_log_file_size, value: 2G }
+    - { option: character-set-server, value: utf8mb4 }
     - { option: bind-address, value: 127.0.0.1 }
