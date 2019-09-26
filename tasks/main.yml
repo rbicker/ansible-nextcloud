@@ -6,7 +6,7 @@
     name:
       - epel-release
       - https://rpms.remirepo.net/enterprise/remi-release-{{ ansible_distribution_major_version }}.rpm
-    state: latest
+    state: present
   when: nextcloud_manage_yum_repos
 
 - name: add MariaDB repo
@@ -294,6 +294,12 @@
     minute: "*/5"
     user: nginx
     job: 'php -f {{ nextcloud_web_root | quote }}/cron.php'
+
+- name: performance tuning - ensure Nextcloud uses cron
+  command: 'php {{ nextcloud_web_root }}/occ background:cron'
+  become: true
+  become_user: nginx
+  changed_when: true
 
 - name: ensure options are set in .user.ini
   lineinfile:
