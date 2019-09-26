@@ -7,3 +7,4 @@
     nextcloud_admin_user: admin
     nextcloud_admin_pw: test
     nextcloud_use_https: false
+    nextcloud_domain: localhost

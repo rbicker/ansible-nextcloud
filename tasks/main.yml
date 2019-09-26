@@ -6,7 +6,7 @@
     name:
       - epel-release
       - https://rpms.remirepo.net/enterprise/remi-release-{{ ansible_distribution_major_version }}.rpm
-    state: present
+    state: latest
   when: nextcloud_manage_yum_repos
 
 - name: add MariaDB repo
@@ -24,7 +24,7 @@
   when: nextcloud_manage_yum_repos
 
 - name: ensure correct PHP repo is enabled  # noqa 301
-  command: yum-config-manager --enable remi-{{ php_version }}
+  command: yum-config-manager --setopt="remi-{{ php_version }}.priority=1" --enable remi-{{ php_version }}
   changed_when: no
   when: nextcloud_manage_yum_repos
 
@@ -39,6 +39,7 @@
       - openssl
       - MySQL-python
       - redis
+      - logrotate
       - php
       - php-fpm
       - php-opcache
@@ -203,6 +204,11 @@
   notify:
     - reload nginx
 
+- name: ensure nextcloud logrotate is present
+  copy:
+    src: nextcloud
+    dest: /etc/logrotate.d/nextcloud
+
 - name: ensure ssl key and cert are present
   command: >
     openssl req -new -nodes -x509 -subj {{ nextcloud_ssl_subject }}
@@ -224,7 +230,6 @@
     - { name: group, value: nginx }
     - { name: clear_env, value: 'no' }
   notify: reload php-fpm
-
 
 - name: ensure opcache settings are correct
   lineinfile:
