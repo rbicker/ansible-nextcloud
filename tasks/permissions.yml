@@ -8,7 +8,7 @@
 
 - name: ensure directories exist with correct permissions
   file:
-    path: '{{ item  }}'
+    path: '{{ item }}'
     owner: nginx
     group: nginx
     recurse: yes

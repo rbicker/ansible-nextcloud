@@ -185,6 +185,13 @@
     group: nginx
     state: directory
 
+- name: ensure log directory for nextcloud exists and has nginx as owner
+  file:
+    path: /var/log/nextcloud
+    owner: nginx
+    group: nginx
+    state: directory
+
 - name: ensure /etc/nginx/nginx.conf is present
   copy:
     src: nginx.conf
@@ -299,7 +306,7 @@
   command: 'php {{ nextcloud_web_root }}/occ background:cron'
   become: true
   become_user: nginx
-  changed_when: true
+  changed_when: no
 
 - name: ensure options are set in .user.ini
   lineinfile:

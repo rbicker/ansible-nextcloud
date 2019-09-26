@@ -42,3 +42,6 @@
     msg: 'nextcloud version has been upgraded from {{ nextcloud_installed_version.stdout  }} to {{ nextcloud_upgraded_version.stdout }}'
   changed_when: yes
   when: nextcloud_installed_version.stdout != nextcloud_upgraded_version.stdout
+  notify:
+    - add missing indices
+    - convert columns to big int
