@@ -52,12 +52,13 @@
       - php-ldap
       - php-imap
       - php-pecl-apcu
-      - php-pecl-redis
+      - php-pecl-redis5
       - php-pecl-imagick
       - php-pecl-zip
       - php-process  # posix
       - jq
     state: latest
+    enablerepo: remi
 
 - name: ensure mariadb-server is installed  # noqa 403
   yum:

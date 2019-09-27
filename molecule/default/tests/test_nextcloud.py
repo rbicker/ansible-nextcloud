@@ -38,7 +38,7 @@ test package installation
     "php-ldap",
     "php-imap",
     "php-pecl-apcu",
-    "php-pecl-redis4",
+    "php-pecl-redis5",
     "php-pecl-imagick",
     "php-pecl-zip",
     "php-process"

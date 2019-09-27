@@ -55,3 +55,9 @@
   become: yes
   become_user: nginx
   changed_when: no
+
+- name: add mimetypes to database
+  command: '{{ nextcloud_web_root }}/occ maintenance:mimetype:update-db'
+  become: yes
+  become_user: nginx
+  changed_when: no
