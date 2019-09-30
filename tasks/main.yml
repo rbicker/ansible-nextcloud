@@ -186,6 +186,16 @@
     group: nginx
     state: directory
 
+- name: ensure directories for php cache exist and has correct permissions
+  file:
+    path: /var/lib/php/{{ item }}
+    owner: root
+    group: nginx
+    state: directory
+  loop:
+    - swdlcache
+    - opcache
+
 - name: ensure log directory for nextcloud exists and has nginx as owner
   file:
     path: /var/log/nextcloud
