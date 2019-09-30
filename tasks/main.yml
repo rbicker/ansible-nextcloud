@@ -138,6 +138,7 @@
     - { option: 'max_execution_time', value: '{{ nextcloud_max_upload_time }}' }
     - { option: 'upload_tmp_dir', value: '{{ nextcloud_upload_tmp_dir }}' }
     - { option: 'memory_limit', value: '{{ nextcloud_php_memory_limit }}' }
+    - { option: 'apc.enable_cli', value: '1' }
   notify:
     - reload php-fpm
     - reload nginx
