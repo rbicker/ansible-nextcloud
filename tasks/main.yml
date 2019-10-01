@@ -12,7 +12,7 @@
 - name: add MariaDB repo
   yum_repository:
     name: mariadb
-    description: Extra Packages for Enterprise Linux 7 - $basearch
+    description: Extra Packages for Enterprise Linux {{ ansible_distribution_major_version }} - $basearch
     baseurl: http://yum.mariadb.org/{{ mariadb_version }}/centos{{ ansible_distribution_major_version|int }}-amd64
     gpgkey: https://yum.mariadb.org/RPM-GPG-KEY-MariaDB
     gpgcheck: yes
@@ -21,23 +21,31 @@
 - name: ensure all PHP repos are disabled  # noqa 301
   command: yum-config-manager --disable remi-php*
   changed_when: no
-  when: nextcloud_manage_yum_repos
+  when: nextcloud_manage_yum_repos and ansible_distribution_major_version|int <= 7
 
 - name: ensure correct PHP repo is enabled  # noqa 301
-  command: yum-config-manager --setopt="remi-{{ php_version }}.priority=1" --enable remi-{{ php_version }}
+  command: yum-config-manager --setopt="remi-php{{ php_version | replace(".","") }}.priority=1" --enable remi-php{{ php_version | replace(".","") }}
   changed_when: no
-  when: nextcloud_manage_yum_repos
+  when: nextcloud_manage_yum_repos and ansible_distribution_major_version|int <= 7
+
+- name: enable the module stream for PHP and Redis  # noqa 301
+  dnf:
+    name:
+      - "@php:remi-{{ php_version }}"
+      - "@redis:5"
+  changed_when: no
+  when: nextcloud_manage_yum_repos and ansible_distribution_major_version|int >= 8
 
 - name: ensure required packages are installed  # noqa 403
   yum:
     name:
       - crontabs
-      - libselinux-python
-      - policycoreutils-python
-      - lbzip2-utils
+      - "{{ ((ansible_facts.distribution_major_version|int) <= 7) | ternary('libselinux-python','python3-libselinux') }}"
+      - "{{ ((ansible_facts.distribution_major_version|int) <= 7) | ternary('policycoreutils-python','python3-policycoreutils') }}"
+      - bzip2
       - nginx
       - openssl
-      - MySQL-python
+      - "{{ ((ansible_facts.distribution_major_version|int) <= 7) | ternary('MySQL-python','python3-PyMySQL') }}"
       - redis
       - logrotate
       - php
@@ -57,13 +65,15 @@
       - php-pecl-zip
       - php-process  # posix
       - jq
+      - boost-program-options
     state: latest
     enablerepo: remi
 
-- name: ensure mariadb-server is installed  # noqa 403
+- name: ensure MariaDB-server is installed  # noqa 403
   yum:
-    name: mariadb-server
+    name: MariaDB-server
     enablerepo: mariadb
+    disablerepo: "{% if ansible_facts.distribution_major_version|int >=8 %}AppStream{% else %}{% endif %}"
     state: latest
   notify: mysql optimization
 
@@ -75,17 +85,18 @@
   notify:
     - restart mariadb
 
-- name: ensure mariadb-server is enabled and started
+- name: ensure MariaDB-server is enabled and started
   service:
     name: mariadb
     state: started
     enabled: yes
 
-- name: ensure the mariadb root password is set
+- name: ensure the MariaDB root password is set
   mysql_user:
     login_user: root
     name: root
     password: '{{ mysql_root_pw }}'
+    login_unix_socket: /var/lib/mysql/mysql.sock
   when: mysql_root_pw_modify
 
 - name: ensure /root/.my.cnf is present
@@ -187,14 +198,14 @@
     group: nginx
     state: directory
 
-- name: ensure directories for php cache exist and has correct permissions
+- name: ensure directories for php cache exist and have correct permissions
   file:
     path: /var/lib/php/{{ item }}
     owner: root
     group: nginx
     state: directory
   loop:
-    - swdlcache
+    - wsdlcache
     - opcache
 
 - name: ensure log directory for nextcloud exists and has nginx as owner
@@ -248,6 +259,7 @@
     - { name: user, value: nginx }
     - { name: group, value: nginx }
     - { name: clear_env, value: 'no' }
+    - { name: listen, value: '127.0.0.1:9000' }
   notify: reload php-fpm
 
 - name: ensure opcache settings are correct

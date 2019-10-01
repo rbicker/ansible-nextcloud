@@ -7,7 +7,8 @@ lint:
   name: yamllint
 platforms:
   - name: test-nextcloud-centos
-    image: centos:7
+    image: quay.io/generic/centos8
+    # image: centos:7
     command: /sbin/init
     tmpfs:
       - /run
