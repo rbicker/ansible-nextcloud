@@ -12,7 +12,7 @@
 - name: add MariaDB repo
   yum_repository:
     name: mariadb
-    description: Extra Packages for Enterprise Linux 7 - $basearch
+    description: Extra Packages for Enterprise Linux {{ ansible_distribution_major_version }} - $basearch
     baseurl: http://yum.mariadb.org/{{ mariadb_version }}/centos{{ ansible_distribution_major_version|int }}-amd64
     gpgkey: https://yum.mariadb.org/RPM-GPG-KEY-MariaDB
     gpgcheck: yes
@@ -22,18 +22,19 @@
 - name: get all not-used PHP repos
   shell: |
     set -o pipefail
-    ls /etc/yum.repos.d/remi-php* | grep -v remi-{{ php_version }}
+    ls /etc/yum.repos.d/remi-php* | grep -v remi-php{{ php_version | replace(".","") }}
   register: php_repos
+  when: nextcloud_manage_yum_repos and ansible_distribution_major_version|int <= 7
   changed_when: no
 
 - name: ensure correct PHP repo is enabled and has the correct priority
   ini_file:
-    path: /etc/yum.repos.d/remi-{{ php_version }}.repo
+    path: /etc/yum.repos.d/remi-php{{ php_version | replace(".","") }}.repo
     no_extra_spaces: yes
     section: remi-{{ php_version }}
     option: '{{ item.option }}'
     value: '{{ item.value }}'
-  when: nextcloud_manage_yum_repos
+  when: nextcloud_manage_yum_repos and ansible_distribution_major_version|int <= 7
   loop:
     - { option: 'enabled', value: '1' }
     - { option: 'priority', value: '1' }
@@ -45,19 +46,27 @@
     section: "{{ item | regex_search('(remi-php)\\d\\d') }}"
     option: enabled
     value: "0"
-  when: nextcloud_manage_yum_repos
+  when: nextcloud_manage_yum_repos and ansible_distribution_major_version|int <= 7
   loop: "{{ php_repos.stdout_lines }}"
+
+- name: enable the module stream for PHP and Redis
+  dnf:
+    name:
+      - "@php:remi-{{ php_version }}"
+      - "@redis:5"
+  changed_when: no
+  when: nextcloud_manage_yum_repos and ansible_distribution_major_version|int >= 8
 
 - name: ensure required packages are installed  # noqa 403
   yum:
     name:
       - crontabs
-      - libselinux-python
-      - policycoreutils-python
-      - lbzip2-utils
+      - "{{ ((ansible_facts.distribution_major_version|int) <= 7) | ternary('libselinux-python','python3-libselinux') }}"
+      - "{{ ((ansible_facts.distribution_major_version|int) <= 7) | ternary('policycoreutils-python','python3-policycoreutils') }}"
+      - bzip2
       - nginx
       - openssl
-      - MySQL-python
+      - "{{ ((ansible_facts.distribution_major_version|int) <= 7) | ternary('MySQL-python','python3-PyMySQL') }}"
       - redis
       - logrotate
       - php
@@ -77,6 +86,7 @@
       - php-pecl-zip
       - php-process  # posix
       - jq
+      - boost-program-options
     state: latest
     enablerepo: remi
 
@@ -99,12 +109,13 @@
 - name: "MariaDB Notification to upgrade manually"
   debug:
     msg: "MariaDB is already installed but on version {{ installed_version }} instead of {{ mariadb_version }}. Please upgrade manually."
-  when: "not mariadbresult.skipped is defined and installed_version is version(mariadb_version, '<')"
+  when: "not mariadbresult.skipped is defined and installed_version|replace(' ', '') is version(mariadb_version, '<')"
 
 - name: ensure MariaDB-server is installed
   yum:
     name: MariaDB-server
     enablerepo: mariadb
+    disablerepo: "{% if ansible_facts.distribution_major_version|int >=8 %}AppStream{% else %}{% endif %}"
   notify: mysql optimization
   when: "mariadbresult.skipped is defined"
 
@@ -127,6 +138,7 @@
     login_user: root
     name: root
     password: '{{ mysql_root_pw }}'
+    login_unix_socket: /var/lib/mysql/mysql.sock
   when: mysql_root_pw_modify
 
 - name: ensure /root/.my.cnf is present
@@ -289,6 +301,7 @@
     - { name: user, value: nginx }
     - { name: group, value: nginx }
     - { name: clear_env, value: 'no' }
+    - { name: listen, value: '127.0.0.1:9000' }
   notify: reload php-fpm
 
 - name: ensure opcache settings are correct
