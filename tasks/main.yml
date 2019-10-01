@@ -194,7 +194,7 @@
     group: nginx
     state: directory
   loop:
-    - swdlcache
+    - wsdlcache
     - opcache
 
 - name: ensure log directory for nextcloud exists and has nginx as owner
