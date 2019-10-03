@@ -17,6 +17,7 @@
     gpgkey: https://yum.mariadb.org/RPM-GPG-KEY-MariaDB
     gpgcheck: yes
     enabled: 1
+  when: nextcloud_manage_yum_repos
 
 - name: ensure all PHP repos are disabled  # noqa 301
   command: yum-config-manager --disable remi-php*
