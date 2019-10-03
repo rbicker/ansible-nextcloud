@@ -8,7 +8,7 @@
     nextcloud_admin_pw: test
     nextcloud_use_https: no
     nextcloud_domain: localhost
-    nextcloud_upgrade: no
+    nextcloud_upgrade: yes
     nextcloud_version: latest
     mariadb_version: "10.4"
     php_version: "7.3"
