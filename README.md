@@ -1,7 +1,7 @@
 rbicker.nextcloud
 =================
 
-* install nextcloud on centos 7
+* install Nextcloud on CentOS 7 and 8
 * tested for versions 14 - 17
 * install dependencies: nginx, php7.3, redis 5, mariadb
 * generate ssl cert (self signed) if nextcloud\_use\_https is true
