@@ -11,3 +11,4 @@
     nextcloud_upgrade: yes
     nextcloud_version: latest
     php_version: php73
+    mariadb_version: "10.4"
