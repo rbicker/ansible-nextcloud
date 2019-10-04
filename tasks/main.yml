@@ -19,15 +19,34 @@
     enabled: 1
   when: nextcloud_manage_yum_repos
 
-- name: ensure all PHP repos are disabled  # noqa 301
-  command: yum-config-manager --disable remi-php*
+- name: get all not-used PHP repos
+  shell: |
+    set -o pipefail
+    ls /etc/yum.repos.d/remi-php* | grep -v remi-{{ php_version }}
+  register: php_repos
   changed_when: no
-  when: nextcloud_manage_yum_repos
 
-- name: ensure correct PHP repo is enabled  # noqa 301
-  command: yum-config-manager --setopt="remi-{{ php_version }}.priority=1" --enable remi-{{ php_version }}
-  changed_when: no
+- name: ensure correct PHP repo is enabled and has the correct priority
+  ini_file:
+    path: /etc/yum.repos.d/remi-{{ php_version }}.repo
+    no_extra_spaces: yes
+    section: remi-{{ php_version }}
+    option: '{{ item.option }}'
+    value: '{{ item.value }}'
   when: nextcloud_manage_yum_repos
+  loop:
+    - { option: 'enabled', value: '1' }
+    - { option: 'priority', value: '1' }
+
+- name: ensure all other PHP repos are disabled
+  ini_file:
+    path: "{{ item }}"
+    no_extra_spaces: yes
+    section: "{{ item | regex_search('(remi-php)\\d\\d') }}"
+    option: enabled
+    value: "0"
+  when: nextcloud_manage_yum_repos
+  loop: "{{ php_repos.stdout_lines }}"
 
 - name: ensure required packages are installed  # noqa 403
   yum:
