@@ -79,7 +79,7 @@
 - name: "MariaDB Notification to upgrade manually"
   debug:
     msg: "MariaDB is already installed but on version {{ installed_version }} instead of {{ mariadb_version }}. Please upgrade manually."
-  when: "not mariadbresult.skipped is defined and installed_version is version('{{ mariadb_version }}', '<')"
+  when: "not mariadbresult.skipped is defined and installed_version is version(mariadb_version, '<')"
  
 - name: ensure MariaDB-server is installed
   yum:
