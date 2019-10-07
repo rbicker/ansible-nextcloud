@@ -22,7 +22,7 @@ nextcloud_domain: nextcloud.mydomain.com # domain used in nginx and nextcloud ve
 mysql_root_pw_modify: true # set to false if you do NOT want to modify the mysql root password
 mysql_root_pw: secret # root password for mysql
 nextcloud_repo_url: https://download.nextcloud.com/server/releases # where to get the nextcloud archive
-nextcloud_version: nextcloud-17.0.0 # version to install, choose any from https://download.nextcloud.com/server/releases/ without the file extension (default: latest)
+nextcloud_version: latest-17 # version to install, choose any from https://download.nextcloud.com/server/releases/ without the file extension (default: latest)
 php_version: "7.2" # PHP version to install (default: "7.3")
 mariadb_version: 10.4 # MariaDB version to install (default: 10.4)
 nextcloud_use_https: true # set to false if you want to run your instance behind a loadbalancer with ssl-termination
