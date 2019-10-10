@@ -24,7 +24,7 @@ mysql_root_pw: secret # root password for mysql
 nextcloud_repo_url: https://download.nextcloud.com/server/releases # where to get the nextcloud archive
 nextcloud_version: latest-17 # version to install, choose any from https://download.nextcloud.com/server/releases/ without the file extension (default: latest)
 php_version: "7.2" # PHP version to install (default: "7.3")
-mariadb_version: 10.4 # MariaDB version to install (default: 10.4)
+mariadb_version: "10.4" # MariaDB version to install (default: "10.4")
 nextcloud_use_https: true # set to false if you want to run your instance behind a loadbalancer with ssl-termination
 nextcloud_ssl_cert: /etc/nginx/nextcloud.crt # ssl cert path
 nextcloud_ssl_key: /etc/nginx/nextcloud.key # ssl key path
