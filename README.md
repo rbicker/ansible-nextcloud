@@ -29,7 +29,7 @@ nextcloud_use_https: true # set to false if you want to run your instance behind
 nextcloud_ssl_cert: /etc/nginx/nextcloud.crt # ssl cert path
 nextcloud_ssl_key: /etc/nginx/nextcloud.key # ssl key path
 nextcloud_ssl_skip_gen: false # set to true if you do NOT want role to handle ssl cert generation (then you must provide nextcloud_ssl_* configured files)
-nextcloud_ssl_subject: '/C=CH/ST=Lucerne/L=Lucerne/O=/CN={{ nextcloud_domain }}' # subject for self-signed ssl cert generation
+nextcloud_ssl_subject: '/C=CH/ST=Lucerne/L=Lucerne/CN={{ nextcloud_domain }}' # subject for self-signed ssl cert generation
 nextcloud_web_root: /var/www/nextcloud # web root 
 nextcloud_data_root: '/nextcloud/data'
 nextcloud_admin_user: admin # nextcloud admin username
