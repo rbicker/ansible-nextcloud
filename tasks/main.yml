@@ -31,7 +31,7 @@
   ini_file:
     path: /etc/yum.repos.d/remi-php{{ php_version | replace(".","") }}.repo
     no_extra_spaces: yes
-    section: remi-{{ php_version }}
+    section: remi-php{{ php_version | replace(".","") }}
     option: '{{ item.option }}'
     value: '{{ item.value }}'
   when: nextcloud_manage_yum_repos and ansible_distribution_major_version|int <= 7
