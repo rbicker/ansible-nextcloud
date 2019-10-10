@@ -49,6 +49,13 @@
   when: nextcloud_manage_yum_repos and ansible_distribution_major_version|int <= 7
   loop: "{{ php_repos.stdout_lines }}"
 
+- name: ensure deprecated php module is absent
+  yum:
+    name:
+      - php71w-mcrypt
+      - libmcrypt
+    state: absent
+
 - name: enable the module stream for PHP and Redis
   dnf:
     name:
