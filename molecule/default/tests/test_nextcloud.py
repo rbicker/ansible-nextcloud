@@ -17,12 +17,9 @@ test package installation
 @pytest.mark.parametrize("name", [
     "nginx",
     "crontabs",
-    "libselinux-python",
-    "policycoreutils-python",
-    "lbzip2-utils",
+    "bzip2",
     "nginx",
     "openssl",
-    "MySQL-python",
     "redis",
     "jq",
     "MariaDB-server",

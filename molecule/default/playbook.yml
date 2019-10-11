@@ -10,5 +10,5 @@
     nextcloud_domain: localhost
     nextcloud_upgrade: no
     nextcloud_version: latest
-    php_version: php73
     mariadb_version: "10.4"
+    php_version: "7.3"

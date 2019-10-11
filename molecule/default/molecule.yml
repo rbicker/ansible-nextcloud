@@ -5,9 +5,12 @@ driver:
   name: docker
 lint:
   name: yamllint
+  options:
+    config-data:
+      ignore: .github
 platforms:
   - name: test-nextcloud-centos
-    image: centos:7
+    image: centos:8
     command: /sbin/init
     tmpfs:
       - /run
