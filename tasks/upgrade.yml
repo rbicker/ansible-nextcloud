@@ -3,42 +3,46 @@
 
 - name: get current nextcloud version, before upgrade
   command: '{{ nextcloud_web_root }}/occ -V'
-  become: true
+  become: yes
   become_user: nginx
   register: nextcloud_installed_version
-  changed_when: false
+  changed_when: no
 
 - name: run nextcloud's updater.phar in non-interactive way
   command: 'php {{ nextcloud_web_root }}/updater/updater.phar --no-interaction'
-  become: true
+  become: yes
   become_user: nginx
   register: nextcloud_update_result
-  changed_when: false  # unsure if upgrade has been done -> inform later
+  changed_when: no  # unsure if upgrade has been done -> inform later
 
 - import_tasks: permissions.yml
 
 - name: get current nextcloud version, after running updater.phar
   command: '{{ nextcloud_web_root }}/occ -V'
-  become: true
+  become: yes
   become_user: nginx
   register: nextcloud_upgraded_version
-  changed_when: false
+  changed_when: no
 
 - name: finish nextcloud upgrade by running occ upgrade
   command: '{{ nextcloud_web_root }}/occ upgrade'
-  become: true
+  become: yes
   become_user: nginx
   when: nextcloud_installed_version.stdout != nextcloud_upgraded_version.stdout
 
 - name: get current nextcloud version, after occ upgrade
   command: '{{ nextcloud_web_root }}/occ -V'
-  become: true
+  become: yes
   become_user: nginx
   register: nextcloud_upgraded_version
-  changed_when: false
+  changed_when: no
 
 - name: inform about upgrade
   debug:
     msg: 'nextcloud version has been upgraded from {{ nextcloud_installed_version.stdout  }} to {{ nextcloud_upgraded_version.stdout }}'
-  changed_when: true
+  changed_when: yes
   when: nextcloud_installed_version.stdout != nextcloud_upgraded_version.stdout
+  notify:
+    - add missing indices
+    - convert columns to big int
+    - add mimetypes to database

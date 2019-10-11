@@ -1,0 +1,10 @@
+/var/log/nextcloud/nextcloud.log {
+    daily
+    missingok
+    rotate 14
+    compress
+    delaycompress
+    copytruncate
+    notifempty
+}
+

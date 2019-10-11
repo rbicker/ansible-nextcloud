@@ -6,4 +6,9 @@
   vars:
     nextcloud_admin_user: admin
     nextcloud_admin_pw: test
-    nextcloud_use_https: false
+    nextcloud_use_https: no
+    nextcloud_domain: localhost
+    nextcloud_upgrade: no
+    nextcloud_version: latest
+    php_version: php73
+    mariadb_version: "10.4"

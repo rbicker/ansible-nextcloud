@@ -6,7 +6,7 @@ driver:
 lint:
   name: yamllint
 platforms:
-  - name: instance
+  - name: test-nextcloud-centos
     image: centos:7
     command: /sbin/init
     tmpfs:
@@ -14,6 +14,9 @@ platforms:
       - /tmp
     volumes:
       - /sys/fs/cgroup:/sys/fs/cgroup:ro
+    published_ports:
+      - 0.0.0.0:8000:80
+      - 0.0.0.0:4430:443
 provisioner:
   name: ansible
   lint:

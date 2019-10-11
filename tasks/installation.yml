@@ -3,7 +3,7 @@
 
 - name: installation - ensure nextcloud is unarchived in {{ nextcloud_web_root }}
   unarchive:
-    src: '{{ nextcloud_repo_url  }}/{{ nextcloud_version }}.tar.bz2'
+    src: '{{ nextcloud_repo_url }}/{{ nextcloud_version }}.tar.bz2'
     extra_opts:
       - '--strip-components=1'
       - '--show-stored-names'
@@ -38,12 +38,6 @@
   become_user: nginx
   changed_when: true
 
-- name: performance tuning - use redis for file locking
-  command: 'php {{ nextcloud_web_root }}/occ config:system:set memcache.locking --value "\OC\Memcache\Redis"'
-  become: true
-  become_user: nginx
-  changed_when: true
-
 - name: performance tuning - connect to redis on unixsocket
   command: 'php {{ nextcloud_web_root }}/occ config:system:set redis "host" --value "/var/run/redis/redis.sock"'
   become: true
@@ -56,8 +50,14 @@
   become_user: nginx
   changed_when: true
 
-- name: performance tuning - js and css asset management
-  command: 'php {{ nextcloud_web_root }}/occ config:system:set asset-pipeline.enabled --value true'
+- name: performance tuning - use redis for file locking
+  command: 'php {{ nextcloud_web_root }}/occ config:system:set memcache.locking --value "\OC\Memcache\Redis"'
+  become: true
+  become_user: nginx
+  changed_when: true
+
+- name: performance tuning - set logrotate location
+  command: 'php {{ nextcloud_web_root }}/occ config:system:set logfile --value "/var/log/nextcloud/nextcloud.log"'
   become: true
   become_user: nginx
   changed_when: true

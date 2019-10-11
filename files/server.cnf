@@ -27,7 +27,7 @@
 [mariadb]
 # enable binary logging for nextcloud
 log-bin
-binlog-format=MIXED
+binlog-format=ROW
 
 
 [mariadb-5.5]

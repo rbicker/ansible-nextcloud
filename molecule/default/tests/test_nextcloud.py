@@ -24,24 +24,24 @@ test package installation
     "openssl",
     "MySQL-python",
     "redis",
-    "libreoffice",
     "jq",
-    "mariadb-server",
-    "php71w-fpm",
-    "php71w-opcache",
-    "php71w-common",
-    "php71w-gd",
-    "php71w-xml",
-    "php71w-mbstring",
-    "php71w-intl",
-    "php71w-mcrypt",
-    "php71w-mysql",
-    "php71w-ldap",
-    "php71w-imap",
-    "php71w-pecl-apcu",
-    "php71w-pecl-redis",
-    "php71w-pecl-imagick",
-    "php71w-process"
+    "MariaDB-server",
+    "php",
+    "php-fpm",
+    "php-opcache",
+    "php-common",
+    "php-gd",
+    "php-xml",
+    "php-mbstring",
+    "php-intl",
+    "php-mysqlnd",
+    "php-ldap",
+    "php-imap",
+    "php-pecl-apcu",
+    "php-pecl-redis5",
+    "php-pecl-imagick",
+    "php-pecl-zip",
+    "php-process"
 ])
 def test_package_installation(host, name):
     pkg = host.package(name)
@@ -91,5 +91,5 @@ def test_serverinfo(host):
     assert res["data"]["nextcloud"]["system"]["memcache.locking"] \
         == "\\OC\\Memcache\\Redis"
     assert re.match('^nginx', res["data"]["server"]["webserver"])
-    assert re.match('^7.1.', res["data"]["server"]["php"]["version"])
+    assert re.match('^7.3.', res["data"]["server"]["php"]["version"])
     assert res["data"]["server"]["database"]["type"] == "mysql"

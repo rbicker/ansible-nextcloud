@@ -1,15 +1,54 @@
 ---
 # task file for rbicker.nextcloud
 
-- name: ensure epel-relase and webtatic yum repos are installed
+- name: ensure epel-relase and Remi yum repos are installed
   yum:
     name:
       - epel-release
-      - https://mirror.webtatic.com/yum/el7/webtatic-release.rpm
+      - https://rpms.remirepo.net/enterprise/remi-release-{{ ansible_distribution_major_version }}.rpm
     state: present
   when: nextcloud_manage_yum_repos
 
-- name: ensure required packages are installed
+- name: add MariaDB repo
+  yum_repository:
+    name: mariadb
+    description: Extra Packages for Enterprise Linux 7 - $basearch
+    baseurl: http://yum.mariadb.org/{{ mariadb_version }}/centos{{ ansible_distribution_major_version|int }}-amd64
+    gpgkey: https://yum.mariadb.org/RPM-GPG-KEY-MariaDB
+    gpgcheck: yes
+    enabled: 1
+  when: nextcloud_manage_yum_repos
+
+- name: get all not-used PHP repos
+  shell: |
+    set -o pipefail
+    ls /etc/yum.repos.d/remi-php* | grep -v remi-{{ php_version }}
+  register: php_repos
+  changed_when: no
+
+- name: ensure correct PHP repo is enabled and has the correct priority
+  ini_file:
+    path: /etc/yum.repos.d/remi-{{ php_version }}.repo
+    no_extra_spaces: yes
+    section: remi-{{ php_version }}
+    option: '{{ item.option }}'
+    value: '{{ item.value }}'
+  when: nextcloud_manage_yum_repos
+  loop:
+    - { option: 'enabled', value: '1' }
+    - { option: 'priority', value: '1' }
+
+- name: ensure all other PHP repos are disabled
+  ini_file:
+    path: "{{ item }}"
+    no_extra_spaces: yes
+    section: "{{ item | regex_search('(remi-php)\\d\\d') }}"
+    option: enabled
+    value: "0"
+  when: nextcloud_manage_yum_repos
+  loop: "{{ php_repos.stdout_lines }}"
+
+- name: ensure required packages are installed  # noqa 403
   yum:
     name:
       - crontabs
@@ -20,28 +59,54 @@
       - openssl
       - MySQL-python
       - redis
-      - php71w-fpm
-      - php71w-opcache
-      - php71w-common  # ctype, iconv, json, libxml, simplexml, zip, zlib, curl, fileinfo, bz2, openssl, ftp, exif, gmp
-      - php71w-gd
-      - php71w-xml  # dom, xmlreader, xmlwriter
-      - php71w-mbstring
-      - php71w-intl  # intl
-      - php71w-mcrypt
-      - php71w-mysql
-      - php71w-ldap
-      - php71w-imap
-      - php71w-pecl-apcu
-      - php71w-pecl-redis
-      - php71w-pecl-imagick
-      - php71w-process  # posix
-      - libreoffice
+      - logrotate
+      - php
+      - php-fpm
+      - php-opcache
+      - php-common  # ctype, iconv, json, libxml, simplexml, zip, zlib, curl, fileinfo, bz2, openssl, ftp, exif, gmp
+      - php-gd
+      - php-xml  # dom, xmlreader, xmlwriter
+      - php-mbstring
+      - php-intl  # intl
+      - php-mysqlnd
+      - php-ldap
+      - php-imap
+      - php-pecl-apcu
+      - php-pecl-redis5
+      - php-pecl-imagick
+      - php-pecl-zip
+      - php-process  # posix
       - jq
+    state: latest
+    enablerepo: remi
 
-- name: ensure mariadb-server is installed
+- name: Gather installed packages
+  package_facts:
+    manager: "auto"
+
+- name: check whether MariaDB is installed
+  debug:
+    msg: "MariaDB already installed"
+  when: "'MariaDB-server' in ansible_facts.packages or 'mariadb-server' in ansible_facts.packages"
+  register: mariadbresult
+
+- name: set version var
+  set_fact:
+    installed_version: "{% if ansible_facts.packages['MariaDB-server'] is defined %}{{ ansible_facts.packages['MariaDB-server'][0].version }}{% else %}
+      {{ ansible_facts.packages['mariadb-server'][0].version }}{% endif %}"
+  when: "not mariadbresult.skipped is defined"
+
+- name: "MariaDB Notification to upgrade manually"
+  debug:
+    msg: "MariaDB is already installed but on version {{ installed_version }} instead of {{ mariadb_version }}. Please upgrade manually."
+  when: "not mariadbresult.skipped is defined and installed_version is version(mariadb_version, '<')"
+
+- name: ensure MariaDB-server is installed
   yum:
-    name: mariadb-server
+    name: MariaDB-server
+    enablerepo: mariadb
   notify: mysql optimization
+  when: "mariadbresult.skipped is defined"
 
 - name: ensure mysql binary logging is disabled
   lineinfile:
@@ -51,13 +116,13 @@
   notify:
     - restart mariadb
 
-- name: ensure mariadb-server is enabled and started
+- name: ensure MariaDB-server is enabled and started
   service:
     name: mariadb
     state: started
     enabled: yes
 
-- name: ensure the mariadb root password is set
+- name: ensure the MariaDB root password is set
   mysql_user:
     login_user: root
     name: root
@@ -114,6 +179,7 @@
     - { option: 'max_execution_time', value: '{{ nextcloud_max_upload_time }}' }
     - { option: 'upload_tmp_dir', value: '{{ nextcloud_upload_tmp_dir }}' }
     - { option: 'memory_limit', value: '{{ nextcloud_php_memory_limit }}' }
+    - { option: 'apc.enable_cli', value: '1' }
   notify:
     - reload php-fpm
     - reload nginx
@@ -121,7 +187,7 @@
 - name: ensure pdo_mysql.ini config is present
   copy:
     src: pdo_mysql.ini
-    dest: /etc/php.d/pdo_mysql.ini
+    dest: /etc/php.d/30-pdo_mysql.ini
 
 - name: ensure redis options are set
   lineinfile:
@@ -162,6 +228,23 @@
     group: nginx
     state: directory
 
+- name: ensure directories for php cache exist and have correct permissions
+  file:
+    path: /var/lib/php/{{ item }}
+    owner: root
+    group: nginx
+    state: directory
+  loop:
+    - wsdlcache
+    - opcache
+
+- name: ensure log directory for nextcloud exists and has nginx as owner
+  file:
+    path: /var/log/nextcloud
+    owner: nginx
+    group: nginx
+    state: directory
+
 - name: ensure /etc/nginx/nginx.conf is present
   copy:
     src: nginx.conf
@@ -180,6 +263,11 @@
     dest: /etc/nginx/conf.d/nextcloud.conf
   notify:
     - reload nginx
+
+- name: ensure nextcloud logrotate is present
+  copy:
+    src: nextcloud
+    dest: /etc/logrotate.d/nextcloud
 
 - name: ensure ssl key and cert are present
   command: >
@@ -203,10 +291,9 @@
     - { name: clear_env, value: 'no' }
   notify: reload php-fpm
 
-
 - name: ensure opcache settings are correct
   lineinfile:
-    path: /etc/php.d/opcache.ini
+    path: /etc/php.d/10-opcache.ini
     regexp: '^{{ item.name }}\s*='
     line: '{{ item.name }}={{ item.value }}'
   with_items:
@@ -261,12 +348,18 @@
 - import_tasks: permissions.yml
   when: not new_installation.changed and not nextcloud_upgrade
 
-- name: performance tuning - ensure the nextcloud cronjob exists and runs every 15 min
+- name: performance tuning - ensure the nextcloud cronjob exists and runs every 5 min
   cron:
     name: nextcloud
-    minute: 15
+    minute: "*/5"
     user: nginx
     job: 'php -f {{ nextcloud_web_root | quote }}/cron.php'
+
+- name: performance tuning - ensure Nextcloud uses cron
+  command: 'php {{ nextcloud_web_root }}/occ background:cron'
+  become: true
+  become_user: nginx
+  changed_when: no
 
 - name: ensure options are set in .user.ini
   lineinfile:

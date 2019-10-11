@@ -2,17 +2,17 @@ rbicker.nextcloud
 =================
 
 * install nextcloud on centos 7
-* tested for versions 12 - 14
-* install dependencies: nginx, php7.1, redis, mariadb
+* tested for versions 14 - 17
+* install dependencies: nginx, php7.3, redis 5, mariadb
 * generate ssl cert (self signed) if nextcloud\_use\_https is true
-* follow best practises, performance tuning 
+* follow best practices, performance tuning 
 * Nextcloud's updater.phar can be used to update the instance to the latest version
 
 
 Requirements
 ------------
 
-* Currently only tested on centos 7.3 - 7.5
+* Currently only tested on centos 7.3 - 7.7
 
 Role Variables
 --------------
@@ -22,7 +22,9 @@ nextcloud_domain: nextcloud.mydomain.com # domain used in nginx and nextcloud ve
 mysql_root_pw_modify: true # set to false if you do NOT want to modify the mysql root password
 mysql_root_pw: secret # root password for mysql
 nextcloud_repo_url: https://download.nextcloud.com/server/releases # where to get the nextcloud archive
-nextcloud_version: nextcloud-14.0.3 # version to install, choose any from https://download.nextcloud.com/server/releases/ without the file extion (default: latest)
+nextcloud_version: nextcloud-17.0.0 # version to install, choose any from https://download.nextcloud.com/server/releases/ without the file extension (default: latest)
+php_version: php72 # PHP version to install (default: php73)
+mariadb_version: 10.4 # MariaDB version to install (default: 10.4)
 nextcloud_use_https: true # set to false if you want to run your instance behind a loadbalancer with ssl-termination
 nextcloud_ssl_cert: /etc/nginx/nextcloud.crt # ssl cert path
 nextcloud_ssl_key: /etc/nginx/nextcloud.key # ssl key path
@@ -43,7 +45,7 @@ nextcloud_upload_tmp_dir: /nextcloud/tmp # php tmp directory
 nextcloud_http_port: 80 # http port
 nextcloud_https_port: 443 # https port
 nextcloud_php_memory_limit: 512M # memory_limit in php.ini
-nextcloud_manage_yum_repos: true # configure epel & webtatic yum repositories
+nextcloud_manage_yum_repos: true # configure epel, Remi and MariaDB yum repositories
 nextcloud_config_options: # additional options to set in config.php
  - { option: overwrite.cli.url, value: "'https://nextcloud.mydomain.com'" }
  - { option: mail_smtpmode, value: "'smtp'" }

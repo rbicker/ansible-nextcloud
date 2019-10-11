@@ -1,16 +1,18 @@
 ---
 # defaults file for rbicker.nextcloud
 
-mysql_root_pw_modify: true
+mysql_root_pw_modify: yes
 mysql_root_pw: secret
+php_version: php73
+mariadb_version: "10.4"
 nextcloud_repo_url: https://download.nextcloud.com/server/releases
 nextcloud_version: latest
-nextcloud_use_https: true
+nextcloud_use_https: yes
 nextcloud_domain: nextcloud.mydomain.com
 nextcloud_trusted_domains: ['localhost', '{{ nextcloud_domain }}']
 nextcloud_ssl_cert: /etc/nginx/nextcloud.crt
 nextcloud_ssl_key: /etc/nginx/nextcloud.key
-nextcloud_ssl_skip_gen: false
+nextcloud_ssl_skip_gen: no
 nextcloud_ssl_subject: '/C=CH/ST=Lucerne/L=Lucerne/O=/CN={{ nextcloud_domain }}'
 nextcloud_web_root: /var/www/nextcloud
 nextcloud_data_root: /nextcloud/data
@@ -22,8 +24,8 @@ nextcloud_mysql_pw: nextcloud
 nextcloud_max_upload_size: 16G
 nextcloud_max_upload_time: 3600
 nextcloud_upload_tmp_dir: /nextcloud/tmp
-nextcloud_upgrade: false
+nextcloud_upgrade: no
 nextcloud_http_port: 80
 nextcloud_https_port: 443
-nextcloud_manage_yum_repos: true
+nextcloud_manage_yum_repos: yes
 nextcloud_php_memory_limit: 512M
