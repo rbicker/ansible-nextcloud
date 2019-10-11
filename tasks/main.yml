@@ -1,7 +1,7 @@
 ---
 # task file for rbicker.nextcloud
 
-- name: ensure epel-relase and Remi yum repos are installed
+- name: ensure epel-release and Remi yum repos are installed
   yum:
     name:
       - epel-release
