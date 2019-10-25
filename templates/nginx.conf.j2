@@ -113,7 +113,7 @@ server {
         include fastcgi_params;
         fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
         fastcgi_param PATH_INFO $path_info;
-        fastcgi_param HTTPS on;
+        {% if nextcloud_use_https %}fastcgi_param HTTPS on;{% endif %}
         # Avoid sending the security headers twice
         fastcgi_param modHeadersAvailable true;
         # Enable pretty urls
