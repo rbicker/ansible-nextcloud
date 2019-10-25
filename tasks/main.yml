@@ -25,6 +25,7 @@
     ls /etc/yum.repos.d/remi-php* | grep -v remi-php{{ php_version | replace(".","") }}
   register: php_repos
   when: nextcloud_manage_yum_repos and ansible_distribution_major_version|int <= 7
+  check_mode: false
   changed_when: no
 
 - name: ensure correct PHP repo is enabled and has the correct priority
