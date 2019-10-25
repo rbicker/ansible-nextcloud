@@ -18,7 +18,6 @@ test package installation
     "nginx",
     "crontabs",
     "bzip2",
-    "nginx",
     "openssl",
     "redis",
     "jq",
