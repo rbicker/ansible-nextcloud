@@ -5,9 +5,8 @@ rbicker.nextcloud
 * tested for versions 14 - 17
 * install dependencies: nginx, php7.3, redis 5, mariadb
 * generate ssl cert (self signed) if nextcloud\_use\_https is true
-* follow best practices, performance tuning 
+* follow best practices, performance tuning
 * Nextcloud's updater.phar can be used to update the instance to the latest version
-
 
 Requirements
 ------------
@@ -17,7 +16,7 @@ Requirements
 Role Variables
 --------------
 
-```
+```yaml
 nextcloud_domain: nextcloud.mydomain.com # domain used in nginx and nextcloud version (REQUIRED)
 mysql_root_pw_modify: true # set to false if you do NOT want to modify the mysql root password
 mysql_root_pw: secret # root password for mysql
@@ -30,7 +29,7 @@ nextcloud_ssl_cert: /etc/nginx/nextcloud.crt # ssl cert path
 nextcloud_ssl_key: /etc/nginx/nextcloud.key # ssl key path
 nextcloud_ssl_skip_gen: false # set to true if you do NOT want role to handle ssl cert generation (then you must provide nextcloud_ssl_* configured files)
 nextcloud_ssl_subject: '/C=CH/ST=Lucerne/L=Lucerne/CN={{ nextcloud_domain }}' # subject for self-signed ssl cert generation
-nextcloud_web_root: /var/www/nextcloud # web root 
+nextcloud_web_root: /var/www/nextcloud # web root
 nextcloud_data_root: '/nextcloud/data'
 nextcloud_admin_user: admin # nextcloud admin username
 nextcloud_admin_pw: admin # nextcloud admin password
@@ -64,7 +63,7 @@ nextcloud_config_options: # additional options to set in config.php
 Example Playbook
 ----------------
 
-```
+```yaml
 - hosts: servers
   roles:
       - { role: rbicker.nextcloud, nextcloud_domain: nextcloud.mydomain.com }
@@ -74,4 +73,3 @@ License
 -------
 
 MIT
-

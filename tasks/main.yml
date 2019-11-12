@@ -88,14 +88,14 @@
       - php-ldap
       - php-imap
       - php-pecl-apcu
-      - php-pecl-redis5
+      - "php-pecl-redis{% if nextcloud_manage_yum_repos %}5{% endif %}"
       - php-pecl-imagick
       - php-pecl-zip
       - php-process  # posix
       - jq
       - boost-program-options
     state: latest
-    enablerepo: remi
+    enablerepo: "{% if nextcloud_manage_yum_repos %}remi{% else %}{{ omit }}{% endif %}"
 
 - name: Gather installed packages
   package_facts:
