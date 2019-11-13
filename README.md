@@ -46,7 +46,7 @@ nextcloud_https_port: 443 # https port
 nextcloud_php_memory_limit: 512M # memory_limit in php.ini
 nextcloud_manage_yum_repos: true # configure epel, Remi and MariaDB yum repositories
 nextcloud_config_options: # additional options to set in config.php
- - { option: overwrite.cli.url, value: "'https://nextcloud.mydomain.com'" }
+ - { option: overwrite.cli.url, value: "'https://nextcloud.example.com'" }
  - { option: mail_smtpmode, value: "'smtp'" }
  - { option: mail_smtpsecure, value: "'ssl'" }
  - { option: mail_domain, value: "'gmail'" }
