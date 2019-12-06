@@ -193,8 +193,8 @@
     line: '{{ item.option }} = {{ item.value }}'
   with_items:
     - { option: 'expose_php', value: 'Off' }
-    # - { option: 'upload_max_filesize', value: '{{ nextcloud_max_upload_size }}' } # -> .user.ini
-    # - { option: 'post_max_size', value: '{{ nextcloud_max_upload_size }}' } # -> .user.ini
+    - { option: 'upload_max_filesize', value: '{{ nextcloud_max_upload_size }}' }
+    - { option: 'post_max_size', value: '{{ nextcloud_max_upload_size }}' }
     - { option: 'max_input_time', value: '{{ nextcloud_max_upload_time }}' }
     - { option: 'max_execution_time', value: '{{ nextcloud_max_upload_time }}' }
     - { option: 'upload_tmp_dir', value: '{{ nextcloud_upload_tmp_dir }}' }
@@ -388,14 +388,11 @@
   become_user: nginx
   changed_when: no
 
-- name: ensure options are set in .user.ini
-  lineinfile:
-    path: '{{ nextcloud_web_root }}/.user.ini'
-    regexp: '^{{ item.option }}'
-    line: '{{ item.option }}={{ item.value }}'
-  with_items:
-    - { option: 'upload_max_filesize', value: '{{ nextcloud_max_upload_size }}' }
-    - { option: 'post_max_size', value: '{{ nextcloud_max_upload_size }}' }
+- name: performance tuning - set logrotate location
+  command: 'php {{ nextcloud_web_root }}/occ config:system:set logfile --value "/var/log/nextcloud/nextcloud.log"'
+  become: true
+  become_user: nginx
+  changed_when: no
 
 - name: ensure additional options are set in config.php if defined
   lineinfile:

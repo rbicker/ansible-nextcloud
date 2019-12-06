@@ -8,7 +8,7 @@ mariadb_version: "10.4"
 nextcloud_repo_url: https://download.nextcloud.com/server/releases
 nextcloud_version: latest
 nextcloud_use_https: yes
-nextcloud_domain: nextcloud.mydomain.com
+nextcloud_domain: nextcloud.example.com
 nextcloud_trusted_domains: ['localhost', '{{ nextcloud_domain }}']
 nextcloud_ssl_cert: /etc/nginx/nextcloud.crt
 nextcloud_ssl_key: /etc/nginx/nextcloud.key
