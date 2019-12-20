@@ -57,6 +57,7 @@ nextcloud_config_options: # additional options to set in config.php
  - { option: mail_smtpport, value: "'465'" }
  - { option: mail_smtpname, value: "'john.smith'" }
  - { option: mail_smtppassword, value: "'secret123'" }
+nginx_crypto_config: intermediate  # modern, intermediate or old crypto config
 
 ```
 
