@@ -16,6 +16,8 @@
   changed_when: no  # unsure if upgrade has been done -> inform later
 
 - import_tasks: permissions.yml
+  tags:
+    - permissions
 
 - name: get current nextcloud version, after running updater.phar
   command: '{{ nextcloud_web_root }}/occ -V'

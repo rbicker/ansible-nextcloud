@@ -367,13 +367,19 @@
 
 - import_tasks: 'installation.yml'
   when: new_installation.changed
+  tags:
+    - always
 
 - import_tasks: 'upgrade.yml'
   when: nextcloud_upgrade
+  tags:
+    - always
 
 # call filesystem checks if not done by previous tasks
 - import_tasks: permissions.yml
   when: not new_installation.changed and not nextcloud_upgrade
+  tags:
+    - permissions
 
 - name: performance tuning - ensure the nextcloud cronjob exists and runs every 5 min
   cron:

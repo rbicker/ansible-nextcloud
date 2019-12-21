@@ -29,3 +29,4 @@ nextcloud_http_port: 80
 nextcloud_https_port: 443
 nextcloud_manage_yum_repos: yes
 nextcloud_php_memory_limit: 512M
+nextcloud_crypto_config: intermediate
