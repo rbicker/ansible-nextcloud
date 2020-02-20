@@ -241,22 +241,16 @@
     state: directory
   when: nextcloud_fastcgi_temp_dir is defined
 
-- name: ensure directory for php sessions exists and has nginx as owner
-  file:
-    path: /var/lib/php/session
-    owner: nginx
-    group: nginx
-    state: directory
-
 - name: ensure directories for php cache exist and have correct permissions
   file:
     path: /var/lib/php/{{ item }}
-    owner: root
+    owner: nginx
     group: nginx
     state: directory
   loop:
     - wsdlcache
     - opcache
+    - session
 
 - name: ensure log directory for nextcloud exists and has nginx as owner
   file:
