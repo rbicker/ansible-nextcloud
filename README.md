@@ -2,7 +2,7 @@ rbicker.nextcloud
 =================
 
 * install Nextcloud on CentOS 7 and 8
-* tested for versions 14 - 17
+* tested for versions 14 - 18
 * install dependencies: nginx, php7.3, redis 5, mariadb
 * generate ssl cert (self signed) if nextcloud\_use\_https is true
 * follow best practices, performance tuning
@@ -11,7 +11,7 @@ rbicker.nextcloud
 Requirements
 ------------
 
-* Currently only tested on centos 7.3 - 8.0
+* Currently only tested on centos 7.3 - 8.1
 
 Role Variables
 --------------
@@ -21,8 +21,8 @@ nextcloud_domain: nextcloud.mydomain.com # domain used in nginx and nextcloud ve
 mysql_root_pw_modify: true # set to false if you do NOT want to modify the mysql root password
 mysql_root_pw: secret # root password for mysql
 nextcloud_repo_url: https://download.nextcloud.com/server/releases # where to get the nextcloud archive
-nextcloud_version: latest-17 # version to install, choose any from https://download.nextcloud.com/server/releases/ without the file extension (default: latest)
-php_version: "7.2" # PHP version to install (default: "7.3")
+nextcloud_version: latest-18 # version to install, choose any from https://download.nextcloud.com/server/releases/ without the file extension (default: latest)
+php_version: "7.4" # PHP version to install (default: "7.3")
 mariadb_version: "10.4" # MariaDB version to install (default: "10.4")
 nextcloud_use_https: true # set to false if you want to run your instance behind a loadbalancer with ssl-termination
 nextcloud_ssl_cert: /etc/nginx/nextcloud.crt # ssl cert path

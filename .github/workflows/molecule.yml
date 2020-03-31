@@ -1,3 +1,4 @@
+---
 name: Molecule test
 
 on: [push]
@@ -8,17 +9,17 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v1
-      with:
-        path: ./rbicker.nextcloud
-    - name: Set up Python 3.7
-      uses: actions/setup-python@v1
-      with:
-        python-version: 3.7
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install molecule[docker]
-    - name: Run molecule
-      run: |
-        molecule test
+      - uses: actions/checkout@v1
+        with:
+          path: ./rbicker.nextcloud
+      - name: Set up Python 3.8
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.8
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install molecule[docker] ansible-lint pytest testinfra
+      - name: Run molecule
+        run: |
+          molecule test
