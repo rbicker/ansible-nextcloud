@@ -1,6 +1,15 @@
 ---
 # task file for rbicker.nextcloud
 
+- name: ensure rpm keys are imported
+  rpm_key:
+    state: present
+    key: '{{ item }}'
+  loop:
+    - https://getfedora.org/static/fedora.gpg
+    - https://rpms.remirepo.net/RPM-GPG-KEY-remi2018
+  when: nextcloud_manage_yum_repos
+
 - name: ensure epel-release and Remi yum repos are installed
   yum:
     name:
@@ -262,17 +271,6 @@
     - '{{ nextcloud_php_session_save_path }}'
     - '{{ nextcloud_php_soap_wsdl_cache_dir }}'
     - '{{ nextcloud_php_opcache_file_cache }}'
-
-- name: ensure directories for php cache exist and have correct permissions
-  file:
-    path: /var/lib/php/{{ item }}
-    mode: 0644
-    owner: root
-    group: nginx
-    state: directory
-  loop:
-    - wsdlcache
-    - opcache
 
 - name: ensure log directory for nextcloud exists and has nginx as owner
   file:
