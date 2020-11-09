@@ -31,6 +31,7 @@
 - name: ensure correct PHP repo is enabled and has the correct priority
   ini_file:
     path: /etc/yum.repos.d/remi-php{{ php_version | replace(".","") }}.repo
+    mode: 0644
     no_extra_spaces: yes
     section: remi-php{{ php_version | replace(".","") }}
     option: '{{ item.option }}'
@@ -43,6 +44,7 @@
 - name: ensure all other PHP repos are disabled
   ini_file:
     path: "{{ item }}"
+    mode: 0644
     no_extra_spaces: yes
     section: "{{ item | regex_search('(remi-php)\\d\\d') }}"
     option: enabled
@@ -189,6 +191,7 @@
 - name: ensure php options are set
   lineinfile:
     path: /etc/php.ini
+    mode: 0644
     regexp: '^{{ item.option }}'
     line: '{{ item.option }} = {{ item.value }}'
   with_items:
@@ -212,6 +215,7 @@
   copy:
     src: pdo_mysql.ini
     dest: /etc/php.d/30-pdo_mysql.ini
+    mode: 0644
 
 - name: ensure redis options are set
   lineinfile:
@@ -236,6 +240,7 @@
     owner: nginx
     group: nginx
     state: directory
+    mode: 0644
 
 - name: ensure nextcloud_fastcgi_temp_dir directory exists and has nginx as owner
   file:
@@ -243,6 +248,7 @@
     owner: nginx
     group: nginx
     state: directory
+    mode: 0644
   when: nextcloud_fastcgi_temp_dir is defined
 
 - name: ensure directory for php sessions and caches exist
@@ -251,6 +257,7 @@
     owner: nginx
     group: nginx
     state: directory
+    mode: 0644
   loop:
     - '{{ nextcloud_php_session_save_path }}'
     - '{{ nextcloud_php_soap_wsdl_cache_dir }}'
@@ -259,6 +266,7 @@
 - name: ensure directories for php cache exist and have correct permissions
   file:
     path: /var/lib/php/{{ item }}
+    mode: 0644
     owner: root
     group: nginx
     state: directory
@@ -269,6 +277,7 @@
 - name: ensure log directory for nextcloud exists and has nginx as owner
   file:
     path: /var/log/nextcloud
+    mode: 0644
     owner: nginx
     group: nginx
     state: directory
@@ -277,6 +286,7 @@
   copy:
     src: nginx.conf
     dest: /etc/nginx/nginx.conf
+    mode: 0644
   notify:
     - reload nginx
   tags:
@@ -293,6 +303,7 @@
   template:
     src: nginx.conf.j2
     dest: /etc/nginx/conf.d/nextcloud.conf
+    mode: 0644
   notify:
     - reload nginx
   tags:
@@ -302,6 +313,7 @@
   copy:
     src: nextcloud
     dest: /etc/logrotate.d/nextcloud
+    mode: 0644
 
 - name: ensure ssl key and cert are present
   command: >
@@ -370,6 +382,7 @@
 - name: ensure {{ nextcloud_web_root }} is present
   file:
     name: '{{ nextcloud_web_root }}'
+    mode: 0644
     state: directory
   register: new_installation
   tags:
