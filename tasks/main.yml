@@ -200,6 +200,10 @@
     - { option: 'upload_tmp_dir', value: '{{ nextcloud_upload_tmp_dir }}' }
     - { option: 'memory_limit', value: '{{ nextcloud_php_memory_limit }}' }
     - { option: 'apc.enable_cli', value: '1' }
+    - { option: 'session.save_handler', value: 'files' }
+    - { option: 'session.save_path', value: '{{ nextcloud_php_session_save_path }}' }
+    - { option: 'soap.wsdl_cache_dir', value: '{{ nextcloud_php_soap_wsdl_cache_dir }}' }
+    - { option: 'opcache.file_cache', value: '{{ nextcloud_php_opcache_file_cache }}' }
   notify:
     - reload php-fpm
     - reload nginx
@@ -241,12 +245,16 @@
     state: directory
   when: nextcloud_fastcgi_temp_dir is defined
 
-- name: ensure directory for php sessions exists and has nginx as owner
+- name: ensure directory for php sessions and caches exist
   file:
     path: /var/lib/php/session
     owner: nginx
     group: nginx
     state: directory
+  loop:
+    - '{{ nextcloud_php_session_save_path }}'
+    - '{{ nextcloud_php_soap_wsdl_cache_dir }}'
+    - '{{ nextcloud_php_opcache_file_cache }}'
 
 - name: ensure directories for php cache exist and have correct permissions
   file:

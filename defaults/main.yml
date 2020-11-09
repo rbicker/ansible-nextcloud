@@ -30,3 +30,6 @@ nextcloud_https_port: 443
 nextcloud_manage_yum_repos: yes
 nextcloud_php_memory_limit: 512M
 nextcloud_crypto_config: intermediate
+nextcloud_php_session_save_path: /var/lib/php/nextcloud/session
+nextcloud_php_soap_wsdl_cache_dir: /var/lib/php/nextcloud/wsdlcache
+nextcloud_php_opcache_file_cache: /var/lib/php/nextcloud/opcache
