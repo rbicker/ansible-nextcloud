@@ -364,6 +364,8 @@
     name: '{{ nextcloud_web_root }}'
     state: directory
   register: new_installation
+  tags:
+    - always
 
 - import_tasks: 'installation.yml'
   when: new_installation.changed
