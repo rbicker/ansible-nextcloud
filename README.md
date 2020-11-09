@@ -2,7 +2,7 @@ rbicker.nextcloud
 =================
 
 * install Nextcloud on CentOS 7 and 8
-* tested for versions 14 - 18
+* tested for versions 14 - 20
 * install dependencies: nginx, php7.3, redis 5, mariadb
 * generate ssl cert (self signed) if nextcloud\_use\_https is true
 * follow best practices, performance tuning
@@ -11,7 +11,7 @@ rbicker.nextcloud
 Requirements
 ------------
 
-* Currently only tested on centos 7.3 - 8.1
+* currently only tested on centos 7.3 - 8.2
 
 Role Variables
 --------------

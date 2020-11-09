@@ -1,6 +1,15 @@
 ---
 # task file for rbicker.nextcloud
 
+- name: ensure rpm keys are imported
+  rpm_key:
+    state: present
+    key: '{{ item }}'
+  loop:
+    - https://getfedora.org/static/fedora.gpg
+    - https://rpms.remirepo.net/RPM-GPG-KEY-remi2018
+  when: nextcloud_manage_yum_repos
+
 - name: ensure epel-release and Remi yum repos are installed
   yum:
     name:
@@ -31,6 +40,7 @@
 - name: ensure correct PHP repo is enabled and has the correct priority
   ini_file:
     path: /etc/yum.repos.d/remi-php{{ php_version | replace(".","") }}.repo
+    mode: 0644
     no_extra_spaces: yes
     section: remi-php{{ php_version | replace(".","") }}
     option: '{{ item.option }}'
@@ -43,6 +53,7 @@
 - name: ensure all other PHP repos are disabled
   ini_file:
     path: "{{ item }}"
+    mode: 0644
     no_extra_spaces: yes
     section: "{{ item | regex_search('(remi-php)\\d\\d') }}"
     option: enabled
@@ -189,6 +200,7 @@
 - name: ensure php options are set
   lineinfile:
     path: /etc/php.ini
+    mode: 0644
     regexp: '^{{ item.option }}'
     line: '{{ item.option }} = {{ item.value }}'
   with_items:
@@ -200,6 +212,10 @@
     - { option: 'upload_tmp_dir', value: '{{ nextcloud_upload_tmp_dir }}' }
     - { option: 'memory_limit', value: '{{ nextcloud_php_memory_limit }}' }
     - { option: 'apc.enable_cli', value: '1' }
+    - { option: 'session.save_handler', value: 'files' }
+    - { option: 'session.save_path', value: '{{ nextcloud_php_session_save_path }}' }
+    - { option: 'soap.wsdl_cache_dir', value: '{{ nextcloud_php_soap_wsdl_cache_dir }}' }
+    - { option: 'opcache.file_cache', value: '{{ nextcloud_php_opcache_file_cache }}' }
   notify:
     - reload php-fpm
     - reload nginx
@@ -208,6 +224,7 @@
   copy:
     src: pdo_mysql.ini
     dest: /etc/php.d/30-pdo_mysql.ini
+    mode: 0644
 
 - name: ensure redis options are set
   lineinfile:
@@ -232,6 +249,7 @@
     owner: nginx
     group: nginx
     state: directory
+    mode: 0644
 
 - name: ensure nextcloud_fastcgi_temp_dir directory exists and has nginx as owner
   file:
@@ -239,28 +257,25 @@
     owner: nginx
     group: nginx
     state: directory
+    mode: 0644
   when: nextcloud_fastcgi_temp_dir is defined
 
-- name: ensure directory for php sessions exists and has nginx as owner
+- name: ensure directory for php sessions and caches exist
   file:
     path: /var/lib/php/session
     owner: nginx
     group: nginx
     state: directory
-
-- name: ensure directories for php cache exist and have correct permissions
-  file:
-    path: /var/lib/php/{{ item }}
-    owner: root
-    group: nginx
-    state: directory
+    mode: 0644
   loop:
-    - wsdlcache
-    - opcache
+    - '{{ nextcloud_php_session_save_path }}'
+    - '{{ nextcloud_php_soap_wsdl_cache_dir }}'
+    - '{{ nextcloud_php_opcache_file_cache }}'
 
 - name: ensure log directory for nextcloud exists and has nginx as owner
   file:
     path: /var/log/nextcloud
+    mode: 0644
     owner: nginx
     group: nginx
     state: directory
@@ -269,6 +284,7 @@
   copy:
     src: nginx.conf
     dest: /etc/nginx/nginx.conf
+    mode: 0644
   notify:
     - reload nginx
   tags:
@@ -285,6 +301,7 @@
   template:
     src: nginx.conf.j2
     dest: /etc/nginx/conf.d/nextcloud.conf
+    mode: 0644
   notify:
     - reload nginx
   tags:
@@ -294,6 +311,7 @@
   copy:
     src: nextcloud
     dest: /etc/logrotate.d/nextcloud
+    mode: 0644
 
 - name: ensure ssl key and cert are present
   command: >
@@ -362,8 +380,11 @@
 - name: ensure {{ nextcloud_web_root }} is present
   file:
     name: '{{ nextcloud_web_root }}'
+    mode: 0644
     state: directory
   register: new_installation
+  tags:
+    - always
 
 - import_tasks: 'installation.yml'
   when: new_installation.changed

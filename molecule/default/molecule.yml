@@ -6,7 +6,7 @@ driver:
 lint: |
   set -e
   yamllint .
-  ansible-lint
+  ansible-lint -x 106
 platforms:
   - name: test-nextcloud-centos
     image: centos:8
