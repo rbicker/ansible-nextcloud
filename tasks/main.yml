@@ -249,7 +249,7 @@
     owner: nginx
     group: nginx
     state: directory
-    mode: 0644
+    mode: 0755
 
 - name: ensure nextcloud_fastcgi_temp_dir directory exists and has nginx as owner
   file:
@@ -257,7 +257,7 @@
     owner: nginx
     group: nginx
     state: directory
-    mode: 0644
+    mode: 0755
   when: nextcloud_fastcgi_temp_dir is defined
 
 - name: ensure directory for php sessions and caches exist
@@ -266,7 +266,7 @@
     owner: nginx
     group: nginx
     state: directory
-    mode: 0644
+    mode: 0755
   loop:
     - '{{ nextcloud_php_session_save_path }}'
     - '{{ nextcloud_php_soap_wsdl_cache_dir }}'
@@ -275,7 +275,7 @@
 - name: ensure log directory for nextcloud exists and has nginx as owner
   file:
     path: /var/log/nextcloud
-    mode: 0644
+    mode: 0755
     owner: nginx
     group: nginx
     state: directory
@@ -380,7 +380,7 @@
 - name: ensure {{ nextcloud_web_root }} is present
   file:
     name: '{{ nextcloud_web_root }}'
-    mode: 0644
+    mode: 0755
     state: directory
   register: new_installation
   tags:

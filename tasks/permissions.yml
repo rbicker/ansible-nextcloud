@@ -9,7 +9,7 @@
 - name: ensure directories exist with correct permissions
   file:
     path: '{{ item }}'
-    mode: 0644
+    mode: 0755
     owner: nginx
     group: nginx
     recurse: yes
