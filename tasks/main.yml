@@ -89,7 +89,9 @@
       - redis
       - logrotate
       - php
+      - php-bcmath
       - php-fpm
+      - php-gmp
       - php-opcache
       - php-common  # ctype, iconv, json, libxml, simplexml, zip, zlib, curl, fileinfo, bz2, openssl, ftp, exif, gmp
       - php-gd
