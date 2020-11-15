@@ -377,7 +377,12 @@
     name: /root/.bashrc
     line: "alias occ='sudo -u nginx {{ nextcloud_web_root }}/occ'"
 
-- name: ensure {{ nextcloud_web_root }} is present
+- name: check nextcloud web root stat
+  stat:
+    path: '{{ nextcloud_web_root }}'
+  register: nextcloud_web_root_stat
+
+- name: ensure nextcloud web root is present
   file:
     name: '{{ nextcloud_web_root }}'
     mode: 0755
@@ -387,7 +392,7 @@
     - always
 
 - import_tasks: 'installation.yml'
-  when: new_installation.changed
+  when: not nextcloud_web_root_stat.stat.exists
   tags:
     - always
 
@@ -398,7 +403,9 @@
 
 # call filesystem checks if not done by previous tasks
 - import_tasks: permissions.yml
-  when: not new_installation.changed and not nextcloud_upgrade
+  when: 
+    - not nextcloud_web_root_stat.stat.exists
+    - not nextcloud_upgrade
   tags:
     - permissions
 
