@@ -172,6 +172,15 @@
     force: no  # don't overwrite, only create if not exists
   when: mysql_root_pw_modify
 
+- name: ensure mysql root password is up to date in /root/.my.cnf
+  lineinfile:
+    path: /root/.my.cnf
+    owner: root
+    group: root
+    mode: '0600'
+    regexp: '^password='
+    line: 'password={{ mysql_root_pw }}'
+
 - name: ensure anonymous mysql user is absent
   mysql_user:
     name: ''
@@ -405,7 +414,7 @@
 
 # call filesystem checks if not done by previous tasks
 - import_tasks: permissions.yml
-  when: 
+  when:
     - not nextcloud_web_root_stat.stat.exists
     - not nextcloud_upgrade
   tags:
