@@ -273,7 +273,7 @@
 
 - name: ensure directory for php sessions and caches exist
   file:
-    path: /var/lib/php/session
+    path: '{{ item }}' 
     owner: nginx
     group: nginx
     state: directory
