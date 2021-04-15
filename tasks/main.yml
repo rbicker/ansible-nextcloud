@@ -231,6 +231,21 @@
     - reload php-fpm
     - reload nginx
 
+- name: ensure php-fpm www.conf settings are correct
+  lineinfile:
+    path: /etc/php-fpm.d/www.conf
+    regexp: '^;?{{ item.option }}\s*='
+    line: '{{ item.option }} = {{ item.value }}'
+  with_items:
+    - { option: user, value: nginx }
+    - { option: group, value: nginx }
+    - { option: clear_env, value: 'no' }
+    - { option: listen, value: '127.0.0.1:9000' }
+    - { option: 'php_value[session.save_path]', value: '{{ nextcloud_php_session_save_path }}' }
+    - { option: 'php_value[soap.wsdl_cache_dir]', value: '{{ nextcloud_php_soap_wsdl_cache_dir }}' }
+    - { option: 'php_value[opcache.file_cache]', value: '{{ nextcloud_php_opcache_file_cache }}' }
+  notify: reload php-fpm
+
 - name: ensure pdo_mysql.ini config is present
   copy:
     src: pdo_mysql.ini
@@ -254,15 +269,7 @@
     append: yes
     groups: redis
 
-- name: ensure upload_tmp_dir directory is present
-  file:
-    path: '{{ nextcloud_upload_tmp_dir }}'
-    owner: nginx
-    group: nginx
-    state: directory
-    mode: 0755
-
-- name: ensure nextcloud_fastcgi_temp_dir directory exists and has nginx as owner
+- name: ensure nextcloud_fastcgi_temp_dir directory exists with the correct permissions
   file:
     path: '{{ nextcloud_fastcgi_temp_dir }}'
     owner: nginx
@@ -271,9 +278,9 @@
     mode: 0755
   when: nextcloud_fastcgi_temp_dir is defined
 
-- name: ensure directory for php sessions and caches exist
+- name: ensure directories for php upload, sessions and caches exist with the correct permissions
   file:
-    path: '{{ item }}' 
+    path: '{{ item }}'
     owner: nginx
     group: nginx
     state: directory
@@ -282,6 +289,7 @@
     - '{{ nextcloud_php_session_save_path }}'
     - '{{ nextcloud_php_soap_wsdl_cache_dir }}'
     - '{{ nextcloud_php_opcache_file_cache }}'
+    - '{{ nextcloud_upload_tmp_dir }}'
 
 - name: ensure log directory for nextcloud exists and has nginx as owner
   file:
@@ -334,18 +342,6 @@
   notify:
     - reload nginx
   when: nextcloud_use_https and not nextcloud_ssl_skip_gen
-
-- name: ensure php-fpm www.conf settings are correct
-  lineinfile:
-    path: /etc/php-fpm.d/www.conf
-    regexp: '^;?{{ item.name }}\s*='
-    line: '{{ item.name }} = {{ item.value }}'
-  with_items:
-    - { name: user, value: nginx }
-    - { name: group, value: nginx }
-    - { name: clear_env, value: 'no' }
-    - { name: listen, value: '127.0.0.1:9000' }
-  notify: reload php-fpm
 
 - name: ensure opcache settings are correct
   lineinfile:

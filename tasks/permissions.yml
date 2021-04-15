@@ -27,6 +27,7 @@
     - '{{ nextcloud_upload_tmp_dir }}(/.*)?'
     - '{{ nextcloud_web_root }}/config(/.*)?'
     - '{{ nextcloud_web_root }}/apps(/.*)?'
+    - '/var/log/nextcloud(/.*)?'
     - '{{ nextcloud_web_root }}/.htaccess'
     - '{{ nextcloud_web_root }}/.user.ini'
   register: sefcontext
