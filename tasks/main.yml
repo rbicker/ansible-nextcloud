@@ -234,16 +234,29 @@
 - name: ensure php-fpm www.conf settings are correct
   lineinfile:
     path: /etc/php-fpm.d/www.conf
-    regexp: '^;?{{ item.option }}\s*='
+    regexp: '{{ item.regexp | default("^;?" + item.option + "\s*=") }}'
     line: '{{ item.option }} = {{ item.value }}'
   with_items:
-    - { option: user, value: nginx }
-    - { option: group, value: nginx }
-    - { option: clear_env, value: 'no' }
-    - { option: listen, value: '127.0.0.1:9000' }
-    - { option: 'php_value[session.save_path]', value: '{{ nextcloud_php_session_save_path }}' }
-    - { option: 'php_value[soap.wsdl_cache_dir]', value: '{{ nextcloud_php_soap_wsdl_cache_dir }}' }
-    - { option: 'php_value[opcache.file_cache]', value: '{{ nextcloud_php_opcache_file_cache }}' }
+    - option: user
+      value: nginx
+    - option: group
+      value: nginx
+    - option: clear_env
+      value: 'no'
+    - option: listen
+      value: '127.0.0.1:9000'
+    # php_value[session.save_path]
+    - regexp: '^;?php_value\[session\.save_path\]\s*='
+      option: 'php_value[session.save_path]'
+      value: '{{ nextcloud_php_session_save_path }}'
+    # php_value[session.wsdl_cache_dir]
+    - regexp: '^;?php_value\[soap\.wsdl_cache_dir\]\s*='
+      option: 'php_value[session.wsdl_cache_dir]'
+      value: '{{ nextcloud_php_soap_wsdl_cache_dir }}'
+    # php_value[opcache.file_cache]
+    - regexp: '^;?php_value\[opcache\.file_cache\]\s*='
+      option: 'php_value[opcache.file_cache]'
+      value: '{{ nextcloud_php_opcache_file_cache }}'
   notify: reload php-fpm
 
 - name: ensure pdo_mysql.ini config is present
