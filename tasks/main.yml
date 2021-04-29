@@ -401,6 +401,8 @@
   stat:
     path: '{{ nextcloud_web_root }}'
   register: nextcloud_web_root_stat
+  tags:
+    - always
 
 - name: ensure nextcloud web root is present
   file:
@@ -427,6 +429,12 @@
     - not nextcloud_web_root_stat.stat.exists
     - not nextcloud_upgrade
   tags:
+    - permissions
+
+- name: force setting permissions if permissions tag is set
+  import_tasks: permissions.yml
+  tags:
+    - never
     - permissions
 
 - name: performance tuning - ensure the nextcloud cronjob exists and runs every 5 min

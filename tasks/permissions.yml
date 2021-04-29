@@ -8,28 +8,30 @@
 
 - name: ensure directories exist with correct permissions
   file:
-    path: '{{ item }}'
+    path: '{{ item.path }}'
     mode: 0755
     owner: nginx
     group: nginx
-    recurse: yes
+    recurse: '{{ item.recurse | default(omit) }}'
     state: directory
   with_items:
-    - '{{ nextcloud_web_root }}'
-    - '{{ nextcloud_data_root }}'
+    - path: '{{ nextcloud_web_root }}'
+      recurse: yes
+    - path: '{{ nextcloud_data_root }}'
 
 - name: ensure SELinux file context mapping definitions are correct
   sefcontext:
-    target: '{{ item  }}'
-    setype: httpd_sys_rw_content_t
+    target: '{{ item.spec }}'
+    setype: '{{ item.type | default("httpd_sys_rw_content_t") }}'
   with_items:
-    - '{{ nextcloud_data_root }}(/.*)?'
-    - '{{ nextcloud_upload_tmp_dir }}(/.*)?'
-    - '{{ nextcloud_web_root }}/config(/.*)?'
-    - '{{ nextcloud_web_root }}/apps(/.*)?'
-    - '/var/log/nextcloud(/.*)?'
-    - '{{ nextcloud_web_root }}/.htaccess'
-    - '{{ nextcloud_web_root }}/.user.ini'
+    - spec: '{{ nextcloud_data_root }}(/.*)?'
+    - spec: '{{ nextcloud_upload_tmp_dir }}(/.*)?'
+    - spec: '{{ nextcloud_web_root }}/config(/.*)?'
+    - spec: '{{ nextcloud_web_root }}/apps(/.*)?'
+    - spec: '{{ nextcloud_web_root }}/.htaccess'
+    - spec: '{{ nextcloud_web_root }}/.user.ini'
+    - spec: '/var/log/nextcloud(/.*)?'
+      type: httpd_log_t
   register: sefcontext
   when: ansible_selinux and ansible_selinux.status == 'enabled'
 
@@ -39,6 +41,7 @@
     - 'restorecon -Rv {{ nextcloud_data_root }}'
     - 'restorecon -Rv {{ nextcloud_upload_tmp_dir }}'
     - 'restorecon -Rv {{ nextcloud_web_root }}'
+    - 'restorecon -Rv /var/log/nextcloud'
   when:
     - ansible_selinux and ansible_selinux.status == 'enabled'
     - sefcontext.changed
