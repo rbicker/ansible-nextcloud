@@ -6,8 +6,8 @@
     state: present
     key: '{{ item }}'
   loop:
-    - https://getfedora.org/static/fedora.gpg
     - https://rpms.remirepo.net/RPM-GPG-KEY-remi2018
+    #- https://getfedora.org/static/fedora.gpg
   when: nextcloud_manage_yum_repos
 
 - name: ensure epel-release and Remi yum repos are installed
