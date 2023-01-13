@@ -65,11 +65,10 @@
       - libmcrypt
     state: absent
 
-- name: enable the module stream for PHP and Redis
+- name: enable the module stream for PHP
   dnf:
     name:
       - "@php:remi-{{ php_version }}"
-      - "@redis:5"
   changed_when: no
   when: nextcloud_manage_yum_repos and ansible_distribution_major_version|int >= 8
 
