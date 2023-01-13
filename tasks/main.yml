@@ -1,12 +1,19 @@
 ---
 # task file for rbicker.nextcloud
 
-- name: ensure rpm keys are imported
+- name: ensure remi gpg keys are imported
   rpm_key:
     state: present
-    key: '{{ item }}'
+    key: "{{ item }}"
   loop:
+    - https://rpms.remirepo.net/RPM-GPG-KEY-remi
+    - https://rpms.remirepo.net/RPM-GPG-KEY-remi2017
     - https://rpms.remirepo.net/RPM-GPG-KEY-remi2018
+    - https://rpms.remirepo.net/RPM-GPG-KEY-remi2019
+    - https://rpms.remirepo.net/RPM-GPG-KEY-remi2020
+    - https://rpms.remirepo.net/RPM-GPG-KEY-remi2021
+    - https://rpms.remirepo.net/RPM-GPG-KEY-remi2022
+    - https://rpms.remirepo.net/RPM-GPG-KEY-remi2023
     #- https://getfedora.org/static/fedora.gpg
   when: nextcloud_manage_yum_repos
 
@@ -43,12 +50,12 @@
     mode: 0644
     no_extra_spaces: yes
     section: remi-php{{ php_version | replace(".","") }}
-    option: '{{ item.option }}'
-    value: '{{ item.value }}'
+    option: "{{ item.option }}"
+    value: "{{ item.value }}"
   when: nextcloud_manage_yum_repos and ansible_distribution_major_version|int <= 7
   loop:
-    - { option: 'enabled', value: '1' }
-    - { option: 'priority', value: '1' }
+    - { option: "enabled", value: "1" }
+    - { option: "priority", value: "1" }
 
 - name: ensure all other PHP repos are disabled
   ini_file:
@@ -76,7 +83,7 @@
   changed_when: no
   when: nextcloud_manage_yum_repos and ansible_distribution_major_version|int >= 8
 
-- name: ensure required packages are installed  # noqa 403
+- name: ensure required packages are installed # noqa 403
   yum:
     name:
       - crontabs
@@ -93,11 +100,11 @@
       - php-fpm
       - php-gmp
       - php-opcache
-      - php-common  # ctype, iconv, json, libxml, simplexml, zip, zlib, curl, fileinfo, bz2, openssl, ftp, exif, gmp
+      - php-common # ctype, iconv, json, libxml, simplexml, zip, zlib, curl, fileinfo, bz2, openssl, ftp, exif, gmp
       - php-gd
-      - php-xml  # dom, xmlreader, xmlwriter
+      - php-xml # dom, xmlreader, xmlwriter
       - php-mbstring
-      - php-intl  # intl
+      - php-intl # intl
       - php-mysqlnd
       - php-ldap
       - php-imap
@@ -105,7 +112,7 @@
       - "php-pecl-redis{% if nextcloud_manage_yum_repos %}5{% endif %}"
       - php-pecl-imagick
       - php-pecl-zip
-      - php-process  # posix
+      - php-process # posix
       - jq
       - boost-program-options
     state: latest
@@ -123,7 +130,8 @@
 
 - name: set version var
   set_fact:
-    installed_version: "{% if ansible_facts.packages['MariaDB-server'] is defined %}{{ ansible_facts.packages['MariaDB-server'][0].version }}{% else %}
+    installed_version:
+      "{% if ansible_facts.packages['MariaDB-server'] is defined %}{{ ansible_facts.packages['MariaDB-server'][0].version }}{% else %}
       {{ ansible_facts.packages['mariadb-server'][0].version }}{% endif %}"
   when: "not mariadbresult.skipped is defined"
 
@@ -144,7 +152,7 @@
   lineinfile:
     path: /etc/my.cnf.d/server.cnf
     state: absent
-    regexp: '^log-bin$'
+    regexp: "^log-bin$"
   notify:
     - restart mariadb
 
@@ -158,7 +166,7 @@
   mysql_user:
     login_user: root
     name: root
-    password: '{{ mysql_root_pw }}'
+    password: "{{ mysql_root_pw }}"
     login_unix_socket: /var/lib/mysql/mysql.sock
   when: mysql_root_pw_modify
 
@@ -168,8 +176,8 @@
     dest: /root/.my.cnf
     owner: root
     group: root
-    mode: '0600'
-    force: no  # don't overwrite, only create if not exists
+    mode: "0600"
+    force: no # don't overwrite, only create if not exists
   when: mysql_root_pw_modify
 
 - name: ensure mysql root password is up to date in /root/.my.cnf
@@ -177,13 +185,13 @@
     path: /root/.my.cnf
     owner: root
     group: root
-    mode: '0600'
-    regexp: '^password='
-    line: 'password={{ mysql_root_pw }}'
+    mode: "0600"
+    regexp: "^password="
+    line: "password={{ mysql_root_pw }}"
 
 - name: ensure anonymous mysql user is absent
   mysql_user:
-    name: ''
+    name: ""
     login_user: root
     host_all: yes
     state: absent
@@ -196,37 +204,49 @@
 
 - name: ensure nextcloud database {{ nextcloud_mysql_db }} exists
   mysql_db:
-    name: '{{ nextcloud_mysql_db }}'
+    name: "{{ nextcloud_mysql_db }}"
     login_user: root
     state: present
 
 - name: ensure database user {{ nextcloud_mysql_user }} exists and has all privileges on {{ nextcloud_mysql_db }}
   mysql_user:
-    name: '{{ nextcloud_mysql_user }}'
-    password: '{{ nextcloud_mysql_pw }}'
+    name: "{{ nextcloud_mysql_user }}"
+    password: "{{ nextcloud_mysql_pw }}"
     login_user: root
-    priv: '{{ nextcloud_mysql_db }}.*:ALL,GRANT'
+    priv: "{{ nextcloud_mysql_db }}.*:ALL,GRANT"
     state: present
 
 - name: ensure php options are set
   lineinfile:
     path: /etc/php.ini
     mode: 0644
-    regexp: '^{{ item.option }}'
-    line: '{{ item.option }} = {{ item.value }}'
+    regexp: "^{{ item.option }}"
+    line: "{{ item.option }} = {{ item.value }}"
   with_items:
-    - { option: 'expose_php', value: 'Off' }
-    - { option: 'upload_max_filesize', value: '{{ nextcloud_max_upload_size }}' }
-    - { option: 'post_max_size', value: '{{ nextcloud_max_upload_size }}' }
-    - { option: 'max_input_time', value: '{{ nextcloud_max_upload_time }}' }
-    - { option: 'max_execution_time', value: '{{ nextcloud_max_upload_time }}' }
-    - { option: 'upload_tmp_dir', value: '{{ nextcloud_upload_tmp_dir }}' }
-    - { option: 'memory_limit', value: '{{ nextcloud_php_memory_limit }}' }
-    - { option: 'apc.enable_cli', value: '1' }
-    - { option: 'session.save_handler', value: 'files' }
-    - { option: 'session.save_path', value: '{{ nextcloud_php_session_save_path }}' }
-    - { option: 'soap.wsdl_cache_dir', value: '{{ nextcloud_php_soap_wsdl_cache_dir }}' }
-    - { option: 'opcache.file_cache', value: '{{ nextcloud_php_opcache_file_cache }}' }
+    - { option: "expose_php", value: "Off" }
+    - {
+        option: "upload_max_filesize",
+        value: "{{ nextcloud_max_upload_size }}",
+      }
+    - { option: "post_max_size", value: "{{ nextcloud_max_upload_size }}" }
+    - { option: "max_input_time", value: "{{ nextcloud_max_upload_time }}" }
+    - { option: "max_execution_time", value: "{{ nextcloud_max_upload_time }}" }
+    - { option: "upload_tmp_dir", value: "{{ nextcloud_upload_tmp_dir }}" }
+    - { option: "memory_limit", value: "{{ nextcloud_php_memory_limit }}" }
+    - { option: "apc.enable_cli", value: "1" }
+    - { option: "session.save_handler", value: "files" }
+    - {
+        option: "session.save_path",
+        value: "{{ nextcloud_php_session_save_path }}",
+      }
+    - {
+        option: "soap.wsdl_cache_dir",
+        value: "{{ nextcloud_php_soap_wsdl_cache_dir }}",
+      }
+    - {
+        option: "opcache.file_cache",
+        value: "{{ nextcloud_php_opcache_file_cache }}",
+      }
   notify:
     - reload php-fpm
     - reload nginx
@@ -235,28 +255,28 @@
   lineinfile:
     path: /etc/php-fpm.d/www.conf
     regexp: '{{ item.regexp | default("^;?" + item.option + "\s*=") }}'
-    line: '{{ item.option }} = {{ item.value }}'
+    line: "{{ item.option }} = {{ item.value }}"
   with_items:
     - option: user
       value: nginx
     - option: group
       value: nginx
     - option: clear_env
-      value: 'no'
+      value: "no"
     - option: listen
-      value: '127.0.0.1:9000'
+      value: "127.0.0.1:9000"
     # php_value[session.save_path]
     - regexp: '^;?php_value\[session\.save_path\]\s*='
-      option: 'php_value[session.save_path]'
-      value: '{{ nextcloud_php_session_save_path }}'
+      option: "php_value[session.save_path]"
+      value: "{{ nextcloud_php_session_save_path }}"
     # php_value[session.wsdl_cache_dir]
     - regexp: '^;?php_value\[soap\.wsdl_cache_dir\]\s*='
-      option: 'php_value[session.wsdl_cache_dir]'
-      value: '{{ nextcloud_php_soap_wsdl_cache_dir }}'
+      option: "php_value[session.wsdl_cache_dir]"
+      value: "{{ nextcloud_php_soap_wsdl_cache_dir }}"
     # php_value[opcache.file_cache]
     - regexp: '^;?php_value\[opcache\.file_cache\]\s*='
-      option: 'php_value[opcache.file_cache]'
-      value: '{{ nextcloud_php_opcache_file_cache }}'
+      option: "php_value[opcache.file_cache]"
+      value: "{{ nextcloud_php_opcache_file_cache }}"
   notify: reload php-fpm
 
 - name: ensure pdo_mysql.ini config is present
@@ -269,10 +289,10 @@
   lineinfile:
     path: /etc/redis.conf
     regexp: '^{{ item.option }}\s'
-    line: '{{ item.option }} {{ item.value }}'
+    line: "{{ item.option }} {{ item.value }}"
   with_items:
-    - { option: 'unixsocket', value: '/var/run/redis/redis.sock' }
-    - { option: 'unixsocketperm', value: '770' }
+    - { option: "unixsocket", value: "/var/run/redis/redis.sock" }
+    - { option: "unixsocketperm", value: "770" }
   notify:
     - restart redis
 
@@ -284,7 +304,7 @@
 
 - name: ensure nextcloud_fastcgi_temp_dir directory exists with the correct permissions
   file:
-    path: '{{ nextcloud_fastcgi_temp_dir }}'
+    path: "{{ nextcloud_fastcgi_temp_dir }}"
     owner: nginx
     group: nginx
     state: directory
@@ -293,16 +313,16 @@
 
 - name: ensure directories for php upload, sessions and caches exist with the correct permissions
   file:
-    path: '{{ item }}'
+    path: "{{ item }}"
     owner: nginx
     group: nginx
     state: directory
     mode: 0755
   loop:
-    - '{{ nextcloud_php_session_save_path }}'
-    - '{{ nextcloud_php_soap_wsdl_cache_dir }}'
-    - '{{ nextcloud_php_opcache_file_cache }}'
-    - '{{ nextcloud_upload_tmp_dir }}'
+    - "{{ nextcloud_php_session_save_path }}"
+    - "{{ nextcloud_php_soap_wsdl_cache_dir }}"
+    - "{{ nextcloud_php_opcache_file_cache }}"
+    - "{{ nextcloud_upload_tmp_dir }}"
 
 - name: ensure log directory for nextcloud exists and has nginx as owner
   file:
@@ -351,7 +371,7 @@
     -days 3650 -keyout {{ nextcloud_ssl_key }} -out {{ nextcloud_ssl_cert }}
     -extensions v3_ca
   args:
-    creates: '{{ nextcloud_ssl_cert }}'
+    creates: "{{ nextcloud_ssl_cert }}"
   notify:
     - reload nginx
   when: nextcloud_use_https and not nextcloud_ssl_skip_gen
@@ -360,7 +380,7 @@
   lineinfile:
     path: /etc/php.d/10-opcache.ini
     regexp: '^{{ item.name }}\s*='
-    line: '{{ item.name }}={{ item.value }}'
+    line: "{{ item.name }}={{ item.value }}"
   with_items:
     - { name: opcache.enable, value: 1 }
     - { name: opcache.enable_cli, value: 1 }
@@ -384,7 +404,7 @@
 
 - name: ensure nginx, php-fpm and redis are enabled and running
   service:
-    name: '{{ item }}'
+    name: "{{ item }}"
     state: started
     enabled: yes
   with_items:
@@ -399,26 +419,26 @@
 
 - name: check nextcloud web root stat
   stat:
-    path: '{{ nextcloud_web_root }}'
+    path: "{{ nextcloud_web_root }}"
   register: nextcloud_web_root_stat
   tags:
     - always
 
 - name: ensure nextcloud web root is present
   file:
-    name: '{{ nextcloud_web_root }}'
+    name: "{{ nextcloud_web_root }}"
     mode: 0755
     state: directory
   register: new_installation
   tags:
     - always
 
-- import_tasks: 'installation.yml'
+- import_tasks: "installation.yml"
   when: not nextcloud_web_root_stat.stat.exists
   tags:
     - always
 
-- import_tasks: 'upgrade.yml'
+- import_tasks: "upgrade.yml"
   when: nextcloud_upgrade
   tags:
     - always
@@ -442,10 +462,10 @@
     name: nextcloud
     minute: "*/5"
     user: nginx
-    job: 'php -f {{ nextcloud_web_root | quote }}/cron.php'
+    job: "php -f {{ nextcloud_web_root | quote }}/cron.php"
 
 - name: performance tuning - ensure Nextcloud uses cron
-  command: 'php {{ nextcloud_web_root }}/occ background:cron'
+  command: "php {{ nextcloud_web_root }}/occ background:cron"
   become: true
   become_user: nginx
   changed_when: no
@@ -458,9 +478,9 @@
 
 - name: ensure additional options are set in config.php if defined
   lineinfile:
-    path: '{{ nextcloud_web_root }}/config/config.php'
+    path: "{{ nextcloud_web_root }}/config/config.php"
     regexp: '^\s*''{{ item.option }}'''
-    line: '  ''{{ item.option }}'' => {{ item.value }},'
+    line: "  '{{ item.option }}' => {{ item.value }},"
     insertafter: '\$CONFIG'
-  with_items: '{{ nextcloud_config_options }}'
+  with_items: "{{ nextcloud_config_options }}"
   when: nextcloud_config_options is defined
