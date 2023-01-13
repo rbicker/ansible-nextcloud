@@ -104,36 +104,17 @@
       - php-process # posix
       - jq
       - boost-program-options
-    state: latest
+    state: present
     enablerepo: "{% if nextcloud_manage_yum_repos %}remi{% else %}{{ omit }}{% endif %}"
 
 - name: Gather installed packages
   package_facts:
     manager: "auto"
 
-- name: check whether mariadb-server is installed
-  debug:
-    msg: "MariaDB already installed"
-  when: "'MariaDB-server' in ansible_facts.packages or 'mariadb-server' in ansible_facts.packages"
-  register: mariadbresult
-
-- name: set mariadb-server version var
-  set_fact:
-    installed_version:
-      "{% if ansible_facts.packages['MariaDB-server'] is defined %}{{ ansible_facts.packages['MariaDB-server'][0].version }}{% else %}
-      {{ ansible_facts.packages['mariadb-server'][0].version }}{% endif %}"
-  when: "not mariadbresult.skipped is defined"
-
-- name: print mariadb-server notification to upgrade manually
-  debug:
-    msg: "MariaDB is already installed but on version {{ installed_version }} instead of {{ mariadb_version }}. Please upgrade manually."
-  when: "not mariadbresult.skipped is defined and installed_version|replace(' ', '') is version(mariadb_version, '<')"
-
 - name: ensure mariadb-server is installed
   yum:
     name: mariadb-server
   notify: mysql optimization
-  when: "mariadbresult.skipped is defined"
 
 - name: ensure mysql binary logging is disabled
   lineinfile:
